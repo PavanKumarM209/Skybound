@@ -42,35 +42,66 @@ skybound/
 
 ---
 
-## How to Run
+## How to Run Locally (Without Docker)
 
-### Option 1: Local Development (without Docker)
-1.  **Start MongoDB:** Ensure you have MongoDB running on port `27017` (e.g. using the Docker database container: `docker run -d --name skybound_mongodb -p 27017:27017 mongo:6.0`).
-2.  **Start Backend:**
-    ```bash
-    cd backend
-    python3 -m venv venv
-    source venv/bin/activate
-    pip install -r requirements.txt
-    python app.py
-    ```
-    *(Runs on http://localhost:5000)*
-3.  **Start Frontend:**
-    ```bash
-    cd frontend
-    npm install
-    PORT=3001 npm run dev
-    ```
-    *(Runs on http://localhost:3001)*
-4.  **Start Ngrok:**
-    ```bash
-    ngrok http 3001
-    ```
+Follow these steps to run the complete stack locally on your host machine. Since each service runs interactively, you should run them in separate terminal tabs or windows.
+
+### Step 1: Start MongoDB
+You need a running MongoDB instance on port `27017`. If you don't have it installed natively, spin up a lightweight Docker container for it:
+```bash
+# Start a MongoDB container mapping to port 27017 on the host
+docker run -d --name skybound_mongodb -p 27017:27017 mongo:6.0
+```
+
+### Step 2: Set up & Run Flask Backend (Terminal 1)
+Open a new terminal window, navigate to the `backend/` directory, set up your Python virtual environment, and start the Flask server:
+```bash
+# Navigate to the backend directory
+cd backend
+
+# Create a virtual environment
+python3 -m venv venv
+
+# Activate the virtual environment
+source venv/bin/activate
+
+# Install the Python dependencies (Flask, PyMongo, CORS, Gunicorn)
+pip install -r requirements.txt
+
+# Run the Flask app
+python app.py
+```
+*The Flask backend will start on **`http://127.0.0.1:5000`** and print a message confirming connection to the MongoDB database.*
+
+### Step 3: Set up & Run Next.js Frontend (Terminal 2)
+Open a new terminal window, navigate to the `frontend/` directory, install Node packages, and run the Next.js development server:
+```bash
+# Navigate to the frontend directory
+cd frontend
+
+# Install the npm packages
+npm install
+
+# Run the Next.js development server on port 3001
+# Note: Next.js dev server will automatically proxy /api/* requests to Flask (port 5000)
+PORT=3001 npm run dev
+```
+*The frontend will compile and start on **`http://localhost:3001`**.*
+
+### Step 4: Expose the App via Ngrok (Terminal 3)
+Open a third terminal window and run Ngrok to tunnel your Next.js frontend to the public internet:
+```bash
+# Expose the local Next.js frontend port
+ngrok http 3001
+```
+*Copy the generated `https://xxxx.ngrok-free.app` URL. Opening this link in any browser will grant full access to both the frontend UI and the proxied API backend over a secure connection.*
 
 ---
 
-### Option 2: Docker Compose (Entire Stack Containerized)
-Ensure you set your `NGROK_AUTHTOKEN` in your environment or a `.env` file at the root, then run:
+## Alternative: Docker Compose (Entire Stack Containerized)
+If you prefer running everything in containerized mode with Ngrok configured automatically:
+1. Ensure you have your `NGROK_AUTHTOKEN` ready.
+2. Run:
 ```bash
 docker compose up --build
 ```
