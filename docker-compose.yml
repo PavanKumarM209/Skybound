@@ -1,0 +1,63 @@
+services:
+  mongodb:
+    image: mongo:6.0
+    container_name: skybound_mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - skybound_network
+    restart: always
+
+  backend:
+    build: ./backend
+    container_name: skybound_backend
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/skybound
+      - PORT=5000
+    volumes:
+      - ./backend:/app
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongodb
+    networks:
+      - skybound_network
+    restart: always
+
+  frontend:
+    build: ./frontend
+    container_name: skybound_frontend
+    environment:
+      - PORT=3000
+      - WATCHPACK_POLLING=true # Helps with dev-server reload in Docker
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - skybound_network
+    restart: always
+
+  nginx:
+    build: ./nginx
+    container_name: skybound_nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - skybound_network
+    restart: always
+
+networks:
+  skybound_network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
