@@ -30,6 +30,7 @@ services:
     environment:
       - PORT=3000
       - WATCHPACK_POLLING=true # Helps with dev-server reload in Docker
+      - BACKEND_URL=http://backend:5000
     volumes:
       - ./frontend:/app
       - /app/node_modules
@@ -39,16 +40,18 @@ services:
       - skybound_network
     restart: always
 
-  nginx:
-    build: ./nginx
-    container_name: skybound_nginx
-    ports:
-      - "80:80"
+  ngrok:
+    image: ngrok/ngrok:latest
+    container_name: skybound_ngrok
+    environment:
+      - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}
+    command: http frontend:3000
     depends_on:
       - frontend
-      - backend
     networks:
       - skybound_network
+    ports:
+      - "4041:4040"
     restart: always
 
 networks:
