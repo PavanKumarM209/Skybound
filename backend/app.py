@@ -33,62 +33,112 @@ DEFAULT_DB = {
         "address": "X-1/32, Daal Mill Road, Budh Vihar, Phase-1, New Delhi-110086, India",
         "map_embed": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3498.4239857905183!2d77.098485!3d28.736785!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390d068593a201c1%3A0xe54fb7a28e932ec3!2sBudh%20Vihar%20Phase%20I%2C%20Budh%20Vihar%2C%20Delhi%2C%20110086!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin",
         "affiliations": [
-            {"name": "Goju-Ryu Karate-Do Sports Federation"},
+            {"name": "Shotokon Karate-Do Sports Federation"},
             {"name": "Martial Arts Games Federation of India (MGFI)"},
             {"name": "Karate India Organisation (KIO)"},
             {"name": "Delhi Olympic Association"}
         ]
     },
+    "trustees": [
+        {
+            "_id": "tr_1",
+            "name": "Renshi Umapathi S S",
+            "role": "Founder, President & Chief Coach",
+            "image_url": "/umapathi_ss.png"
+        },
+        {
+            "_id": "tr_2",
+            "name": "Nethravathi M B",
+            "role": "Founder / Treasurer",
+            "image_url": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=300&auto=format&fit=crop"
+        },
+        {
+            "_id": "tr_3",
+            "name": "Somashekhar S S",
+            "role": "Trustee",
+            "image_url": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=300&auto=format&fit=crop"
+        }
+    ],
     "instructors": [
         {
             "_id": "inst_1",
+            "name": "Sensei Samarth S",
+            "rank": "Black Belt 3rd Dan",
+            "role": "Head Instructor",
+            "location": "Bangalore, Karnataka",
+            "phone": "+91 8510000838",
+            "email": "samarth@example.com",
+            "image_url": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=300&auto=format&fit=crop"
+        },
+        {
+            "_id": "inst_2",
             "name": "Sensei Pavan Kumar M",
             "rank": "Black Belt 2nd Dan",
-            "role": "Coach (KIO)",
+            "role": "Head Examiner",
             "location": "Bangalore, Karnataka",
             "phone": "+91 6362630742",
             "email": "pavankumarm209@gmail.com",
             "image_url": "C:\\Users\\Pavan kumar M\\OneDrive\\Pictures\\Camera Roll\\1VE22CS109_PAVAN_KUMAR_M.jpeg"
         },
         {
-            "_id": "inst_2",
-            "name": "Sensei Samarth",
-            "rank": "Black Belt 2nd Dan",
-            "role": "Senior Coach",
-            "location": "Bangalore, Karnataka",
-            "phone": "+91 8510000838",
-            "email": "samarth12@gmail.com",
-            "image_url": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=300&auto=format&fit=crop"
-        },
-        {
             "_id": "inst_3",
-            "name": "Sensei nitya",
-            "rank": "Black Belt 2st Dan",
-            "role": "Instructor (KFP)",
+            "name": "Sensei Chandana U S",
+            "rank": "Black Belt 2nd Dan",
+            "role": "Disciplinary Head and Data Analyst",
             "location": "Bangalore, Karnataka",
-            "phone": "+91 9069118692",
-            "email": "tarun123@gmail.com",
-            "image_url": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=300&auto=format&fit=crop"
+            "phone": "+91 77777 66666",
+            "email": "chandana@example.com",
+            "image_url": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=300&auto=format&fit=crop"
         },
         {
             "_id": "inst_4",
-            "name": "Sensei Lakshay Mittal",
-            "rank": "Black Belt 2nd Dan (KAI)",
-            "role": "Instructor",
-            "location": "Rama Vihar, Delhi",
-            "phone": "+91 9599712469",
-            "email": "lakshay@example.com",
-            "image_url": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=300&auto=format&fit=crop"
+            "name": "Sensei Nithyanandham P",
+            "rank": "Black Belt 2nd Dan",
+            "role": "Kata and Technical Head",
+            "location": "Bangalore, Karnataka",
+            "phone": "+91 9069118692",
+            "email": "nithyanandham@example.com",
+            "image_url": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=300&auto=format&fit=crop"
         },
         {
             "_id": "inst_5",
-            "name": "Sampai Rishap Yadav",
-            "rank": "Black Belt 1st Dan (GKSF)",
-            "role": "Assistant Instructor",
-            "location": "Mundka, Delhi",
-            "phone": "+91 9540607078",
-            "email": "rishap@example.com",
-            "image_url": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=300&auto=format&fit=crop"
+            "name": "Sensei Ajay P K",
+            "rank": "Black Belt 2nd Dan",
+            "role": "Kubudo Head",
+            "location": "Bangalore, Karnataka",
+            "phone": "+91 33333 22222",
+            "email": "ajay@example.com",
+            "image_url": "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?q=80&w=300&auto=format&fit=crop"
+        },
+        {
+            "_id": "inst_6",
+            "name": "Sensei Sannidhi S",
+            "rank": "Black Belt 2nd Dan",
+            "role": "Kumite and Kickboxing Head",
+            "location": "Bangalore, Karnataka",
+            "phone": "+91 55555 44444",
+            "email": "sannidhi@example.com",
+            "image_url": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=300&auto=format&fit=crop"
+        },
+        {
+            "_id": "inst_7",
+            "name": "Sensei Deva Dharshini",
+            "rank": "Black Belt 2nd Dan",
+            "role": "Tournament Head",
+            "location": "Bangalore, Karnataka",
+            "phone": "+91 22222 11111",
+            "email": "devadharshini@example.com",
+            "image_url": "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?q=80&w=300&auto=format&fit=crop"
+        },
+        {
+            "_id": "inst_8",
+            "name": "Sensei Rishith M",
+            "rank": "Black Belt 2nd Dan",
+            "role": "Media Officer and Financial Advisor",
+            "location": "Bangalore, Karnataka",
+            "phone": "+91 66666 55555",
+            "email": "rishith@example.com",
+            "image_url": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=300&auto=format&fit=crop"
         }
     ],
     "news": [
@@ -127,6 +177,58 @@ DEFAULT_DB = {
             "program": "Belt Grading",
             "date": "2026-06-12",
             "status": "Confirmed"
+        }
+    ],
+    "supporting_instructors": [
+        {
+            "_id": "supp_1",
+            "name": "Sempai Pallavi",
+            "rank": "Black Belt 1st Dan",
+            "role": "Supporting Instructor",
+            "location": "Bangalore, Karnataka",
+            "phone": "+91 99999 11111",
+            "email": "pallavi@example.com",
+            "image_url": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=300&auto=format&fit=crop"
+        },
+        {
+            "_id": "supp_2",
+            "name": "Sempai Yashaswini M",
+            "rank": "Black Belt 1st Dan",
+            "role": "Supporting Instructor",
+            "location": "Bangalore, Karnataka",
+            "phone": "+91 99999 22222",
+            "email": "yashaswini@example.com",
+            "image_url": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=300&auto=format&fit=crop"
+        },
+        {
+            "_id": "supp_3",
+            "name": "Sempai Shravya S Hegde",
+            "rank": "Black Belt 1st Dan",
+            "role": "Supporting Instructor",
+            "location": "Bangalore, Karnataka",
+            "phone": "+91 99999 33333",
+            "email": "shravya@example.com",
+            "image_url": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=300&auto=format&fit=crop"
+        },
+        {
+            "_id": "supp_4",
+            "name": "Sempai Trisha",
+            "rank": "Black Belt 1st Dan",
+            "role": "Supporting Instructor",
+            "location": "Bangalore, Karnataka",
+            "phone": "+91 99999 44444",
+            "email": "trisha@example.com",
+            "image_url": "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?q=80&w=300&auto=format&fit=crop"
+        },
+        {
+            "_id": "supp_5",
+            "name": "Sempai Phanindra Achari V",
+            "rank": "Black Belt 1st Dan",
+            "role": "Supporting Instructor",
+            "location": "Bangalore, Karnataka",
+            "phone": "+91 99999 55555",
+            "email": "phanindra@example.com",
+            "image_url": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=300&auto=format&fit=crop"
         }
     ]
 }
@@ -184,6 +286,11 @@ def init_mongodb():
             db["instructors"].insert_many(DEFAULT_DB["instructors"])
             logger.info("Seeded MongoDB instructors.")
             
+        # Seeding trustees
+        if db["trustees"].count_documents({}) == 0:
+            db["trustees"].insert_many(DEFAULT_DB["trustees"])
+            logger.info("Seeded MongoDB trustees.")
+            
         # Seeding news
         if db["news"].count_documents({}) == 0:
             db["news"].insert_many(DEFAULT_DB["news"])
@@ -193,6 +300,11 @@ def init_mongodb():
         if db["bookings"].count_documents({}) == 0:
             db["bookings"].insert_many(DEFAULT_DB["bookings"])
             logger.info("Seeded MongoDB bookings.")
+            
+        # Seeding supporting_instructors
+        if db["supporting_instructors"].count_documents({}) == 0:
+            db["supporting_instructors"].insert_many(DEFAULT_DB["supporting_instructors"])
+            logger.info("Seeded MongoDB supporting_instructors.")
             
     except Exception as ex:
         logger.error(f"Error seeding MongoDB: {ex}")
@@ -213,6 +325,95 @@ def health_check():
         "database": db_status,
         "service": "Flask API (Local Fallback Mode)" if not db_connected else "Flask API"
     }), 200
+
+# ----------------- TRUSTEES ENDPOINTS -----------------
+@app.route("/api/trustees", methods=["GET"])
+def get_trustees():
+    if db_connected and db is not None:
+        try:
+            trustees = []
+            for doc in db["trustees"].find():
+                doc["_id"] = str(doc["_id"])
+                trustees.append(doc)
+            return jsonify(trustees), 200
+        except Exception as e:
+            logger.error(f"Mongo fetch trustees error: {e}")
+
+    # JSON Fallback
+    data = load_json_db()
+    return jsonify(data.get("trustees", [])), 200
+
+# ----------------- SUPPORTING INSTRUCTORS ENDPOINTS -----------------
+@app.route("/api/supporting-instructors", methods=["GET"])
+def get_supporting_instructors():
+    if db_connected and db is not None:
+        try:
+            supporting = []
+            for doc in db["supporting_instructors"].find():
+                doc["_id"] = str(doc["_id"])
+                supporting.append(doc)
+            return jsonify(supporting), 200
+        except Exception as e:
+            logger.error(f"Mongo fetch supporting error: {e}")
+
+    # JSON Fallback
+    data = load_json_db()
+    return jsonify(data.get("supporting_instructors", [])), 200
+
+
+@app.route("/api/supporting-instructors", methods=["POST"])
+def add_supporting_instructor():
+    req_data = request.json or {}
+    if not req_data.get("name") or not req_data.get("rank"):
+        return jsonify({"error": "Name and rank are required"}), 400
+
+    new_instructor = {
+        "name": req_data["name"],
+        "rank": req_data["rank"],
+        "role": req_data.get("role", "Supporting Instructor"),
+        "location": req_data.get("location", ""),
+        "phone": req_data.get("phone", ""),
+        "email": req_data.get("email", ""),
+        "image_url": req_data.get("image_url", "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=300&auto=format&fit=crop")
+    }
+
+    if db_connected and db is not None:
+        try:
+            result = db["supporting_instructors"].insert_one(new_instructor)
+            new_instructor["_id"] = str(result.inserted_id)
+            return jsonify(new_instructor), 201
+        except Exception as e:
+            logger.error(f"Mongo add supporting instructor error: {e}")
+
+    # JSON Fallback
+    db_data = load_json_db()
+    if "supporting_instructors" not in db_data:
+        db_data["supporting_instructors"] = []
+    new_instructor["_id"] = f"supp_{str(int(len(db_data['supporting_instructors']) + 10))}"
+    db_data["supporting_instructors"].append(new_instructor)
+    save_json_db(db_data)
+    return jsonify(new_instructor), 201
+
+@app.route("/api/supporting-instructors/<id>", methods=["DELETE"])
+def delete_supporting_instructor(id):
+    if db_connected and db is not None:
+        try:
+            result = db["supporting_instructors"].delete_one({"_id": ObjectId(id)})
+            if result.deleted_count > 0:
+                return jsonify({"success": True}), 200
+        except Exception as e:
+            logger.error(f"Mongo delete supporting instructor error: {e}")
+
+    # JSON Fallback
+    db_data = load_json_db()
+    if "supporting_instructors" not in db_data:
+        db_data["supporting_instructors"] = []
+    original_len = len(db_data["supporting_instructors"])
+    db_data["supporting_instructors"] = [i for i in db_data["supporting_instructors"] if i.get("_id") != id]
+    if len(db_data["supporting_instructors"]) < original_len:
+        save_json_db(db_data)
+        return jsonify({"success": True}), 200
+    return jsonify({"error": "Supporting instructor not found"}), 404
 
 # ----------------- DOJO INFO ENDPOINTS -----------------
 @app.route("/api/dojo-info", methods=["GET"])

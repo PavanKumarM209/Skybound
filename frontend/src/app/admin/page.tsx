@@ -56,6 +56,7 @@ export default function AdminDashboard() {
   const [instructors, setInstructors] = useState<Instructor[]>([]);
   const [news, setNews] = useState<NewsItem[]>([]);
   const [dojoInfo, setDojoInfo] = useState<DojoInfo | null>(null);
+  const [supportingInstructors, setSupportingInstructors] = useState<Instructor[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Form States for adding Instructor
@@ -67,6 +68,16 @@ export default function AdminDashboard() {
   const [instEmail, setInstEmail] = useState("");
   const [instImage, setInstImage] = useState("");
   const [instSubmitting, setInstSubmitting] = useState(false);
+
+  // Form States for adding Supporting Instructor
+  const [suppName, setSuppName] = useState("");
+  const [suppRank, setSuppRank] = useState("");
+  const [suppRole, setSuppRole] = useState("Supporting Instructor");
+  const [suppLocation, setSuppLocation] = useState("");
+  const [suppPhone, setSuppPhone] = useState("");
+  const [suppEmail, setSuppEmail] = useState("");
+  const [suppImage, setSuppImage] = useState("");
+  const [suppSubmitting, setSuppSubmitting] = useState(false);
 
   // Form States for adding News
   const [newsTitle, setNewsTitle] = useState("");
@@ -99,11 +110,12 @@ export default function AdminDashboard() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [bookingsRes, instRes, newsRes, infoRes] = await Promise.all([
+      const [bookingsRes, instRes, newsRes, infoRes, suppRes] = await Promise.all([
         fetch("/api/bookings").catch(() => null),
         fetch("/api/instructors").catch(() => null),
         fetch("/api/news").catch(() => null),
-        fetch("/api/dojo-info").catch(() => null)
+        fetch("/api/dojo-info").catch(() => null),
+        fetch("/api/supporting-instructors").catch(() => null)
       ]);
 
       if (bookingsRes && bookingsRes.ok) {
@@ -130,6 +142,11 @@ export default function AdminDashboard() {
         setDojoEmail(infoData.email);
         setDojoAddress(infoData.address);
         setDojoMapEmbed(infoData.map_embed);
+      }
+
+      if (suppRes && suppRes.ok) {
+        const suppData = await suppRes.json();
+        setSupportingInstructors(suppData);
       }
     } catch (err) {
       console.error("Failed to load admin data", err);
@@ -224,6 +241,68 @@ export default function AdminDashboard() {
         setInstructors((prev) => prev.filter((i) => i._id !== id));
       } else {
         alert("Failed to delete instructor.");
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // Add Supporting Instructor
+  const handleAddSupportingInstructor = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!suppName || !suppRank) return;
+
+    try {
+      setSuppSubmitting(true);
+      const res = await fetch("/api/supporting-instructors", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: suppName,
+          rank: suppRank,
+          role: suppRole,
+          location: suppLocation,
+          phone: suppPhone,
+          email: suppEmail,
+          image_url: suppImage || undefined,
+        }),
+      });
+
+      if (res.ok) {
+        const newInst = await res.json();
+        setSupportingInstructors((prev) => [...prev, newInst]);
+        // Reset form
+        setSuppName("");
+        setSuppRank("");
+        setSuppRole("Supporting Instructor");
+        setSuppLocation("");
+        setSuppPhone("");
+        setSuppEmail("");
+        setSuppImage("");
+      } else {
+        alert("Failed to add supporting instructor.");
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSuppSubmitting(false);
+    }
+  };
+
+  // Delete Supporting Instructor
+  const handleDeleteSupportingInstructor = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this supporting instructor?")) return;
+
+    try {
+      const res = await fetch(`/api/supporting-instructors/${id}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        setSupportingInstructors((prev) => prev.filter((i) => i._id !== id));
+      } else {
+        alert("Failed to delete supporting instructor.");
       }
     } catch (err) {
       console.error(err);
@@ -429,6 +508,17 @@ export default function AdminDashboard() {
             }`}
           >
             Manage Instructors ({instructors.length})
+          </button>
+
+          <button
+            onClick={() => setActiveTab("supporting")}
+            className={`w-full text-left px-4 py-3.5 rounded-2xl text-xs font-bold uppercase transition ${
+              activeTab === "supporting"
+                ? "bg-red-600 text-white shadow-lg shadow-red-950/30"
+                : "bg-slate-900/40 border border-slate-900 text-slate-400 hover:text-white"
+            }`}
+          >
+            Supporting Team ({supportingInstructors.length})
           </button>
 
           <button
@@ -666,6 +756,133 @@ export default function AdminDashboard() {
                 </div>
               )}
 
+              {/* TAB: SUPPORTING INSTRUCTORS */}
+              {activeTab === "supporting" && (
+                <div className="space-y-8">
+                  <div>
+                    <h2 className="text-xl font-black text-white">Manage Supporting Team</h2>
+                    <p className="text-slate-400 text-xs">Add or remove supporting coaches and assistant trainers.</p>
+                  </div>
+
+                  {/* Form to Add Supporting Coach */}
+                  <form onSubmit={handleAddSupportingInstructor} className="bg-slate-950/40 border border-slate-850 p-6 rounded-2xl space-y-4">
+                    <h3 className="text-sm font-bold text-red-500 uppercase tracking-wider">Add New Supporting Instructor</h3>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-mono text-slate-500 uppercase mb-1">Full Name</label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="e.g. Sempai Pallavi"
+                          value={suppName}
+                          onChange={(e) => setSuppName(e.target.value)}
+                          className="w-full px-4 py-2 rounded-xl bg-slate-950 border border-slate-800 focus:border-red-500 text-slate-200 text-xs outline-none transition"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-mono text-slate-500 uppercase mb-1">Belt Grade / Rank</label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="e.g. Black Belt 1st Dan"
+                          value={suppRank}
+                          onChange={(e) => setSuppRank(e.target.value)}
+                          className="w-full px-4 py-2 rounded-xl bg-slate-950 border border-slate-800 focus:border-red-500 text-slate-200 text-xs outline-none transition"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-mono text-slate-500 uppercase mb-1">Role/Title</label>
+                        <select
+                          value={suppRole}
+                          onChange={(e) => setSuppRole(e.target.value)}
+                          className="w-full px-4 py-2 rounded-xl bg-slate-950 border border-slate-850 focus:border-red-500 text-slate-200 text-xs outline-none transition"
+                        >
+                          <option value="Supporting Instructor">Supporting Instructor</option>
+                          <option value="Assistant Coach">Assistant Coach</option>
+                          <option value="Trainer">Trainer</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-mono text-slate-500 uppercase mb-1">Location / Branch</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Bangalore, Karnataka"
+                          value={suppLocation}
+                          onChange={(e) => setSuppLocation(e.target.value)}
+                          className="w-full px-4 py-2 rounded-xl bg-slate-950 border border-slate-800 focus:border-red-500 text-slate-200 text-xs outline-none transition"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-mono text-slate-500 uppercase mb-1">Contact Phone</label>
+                        <input
+                          type="tel"
+                          placeholder="e.g. +91 99999 11111"
+                          value={suppPhone}
+                          onChange={(e) => setSuppPhone(e.target.value)}
+                          className="w-full px-4 py-2 rounded-xl bg-slate-950 border border-slate-800 focus:border-red-500 text-slate-200 text-xs outline-none transition"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-mono text-slate-500 uppercase mb-1">Photo URL (Unsplash portrait or local link)</label>
+                      <input
+                        type="url"
+                        placeholder="https://images.unsplash.com/photo-..."
+                        value={suppImage}
+                        onChange={(e) => setSuppImage(e.target.value)}
+                        className="w-full px-4 py-2 rounded-xl bg-slate-950 border border-slate-800 focus:border-red-500 text-slate-200 text-xs outline-none transition"
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={suppSubmitting}
+                      className="px-5 py-2.5 rounded-xl font-bold bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white text-xs shadow-md transition"
+                    >
+                      {suppSubmitting ? "Saving..." : "Register Supporting Member"}
+                    </button>
+                  </form>
+
+                  {/* List of current supporting instructors */}
+                  <div className="space-y-4">
+                    <h3 className="text-sm font-bold text-white uppercase tracking-wider font-mono">Supporting Team Registry</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {supportingInstructors.map((inst) => (
+                        <div
+                          key={inst._id}
+                          className="p-4 bg-slate-950/20 border border-slate-850 rounded-2xl flex items-center justify-between gap-4"
+                        >
+                          <div className="flex items-center gap-3">
+                            <img
+                              src={inst.image_url}
+                              alt={inst.name}
+                              className="w-12 h-12 object-cover rounded-lg bg-slate-800"
+                            />
+                            <div>
+                              <p className="text-sm font-bold text-white">{inst.name}</p>
+                              <p className="text-[10px] text-slate-500 font-mono">{inst.rank} &bull; {inst.role}</p>
+                              <p className="text-[10px] text-slate-400">{inst.location}</p>
+                            </div>
+                          </div>
+                          
+                          <button
+                            onClick={() => inst._id && handleDeleteSupportingInstructor(inst._id)}
+                            className="px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-red-950/30 hover:bg-red-900 border border-red-900/30 text-red-400 hover:text-white transition"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* 3. TAB: NEWS */}
               {activeTab === "news" && (
                 <div className="space-y-8">
@@ -786,7 +1003,7 @@ export default function AdminDashboard() {
                       <input
                         type="text"
                         required
-                        placeholder="e.g. Okinawa Goju Ryu Karate Do"
+                        placeholder="e.g. Okinawa Shotokon Karate Do"
                         value={dojoName}
                         onChange={(e) => setDojoName(e.target.value)}
                         className="w-full px-4 py-2 rounded-xl bg-slate-950 border border-slate-800 focus:border-red-500 text-slate-200 text-xs outline-none transition"

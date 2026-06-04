@@ -7,7 +7,7 @@
         "map_embed": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3498.4239857905183!2d77.098485!3d28.736785!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390d068593a201c1%3A0xe54fb7a28e932ec3!2sBudh%20Vihar%20Phase%20I%2C%20Budh%20Vihar%2C%20Delhi%2C%20110086!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin",
         "affiliations": [
             {
-                "name": "Goju-Ryu Karate-Do Sports Federation"
+                "name": "Shotokon Karate-Do Sports Federation"
             },
             {
                 "name": "Martial Arts Games Federation of India (MGFI)"
@@ -20,56 +20,106 @@
             }
         ]
     },
-    "instructors": [
+    "trustees": [
         {
-            "_id": "inst_1",
-            "name": "Sensei Palash Kumar Pahari",
-            "rank": "Black Belt 2nd Dan",
-            "role": "Coach (KFP)",
-            "location": "Rajiv Nagar, Delhi",
-            "phone": "+91 7011907591",
-            "email": "palash@example.com",
-            "image_url": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=300&auto=format&fit=crop"
+            "_id": "tr_1",
+            "name": "Renshi Umapathi S S",
+            "role": "Founder, President & Chief Coach",
+            "image_url": "/umapathi_ss.png"
         },
         {
-            "_id": "inst_2",
-            "name": "Sensei Laxmi Kumari",
-            "rank": "Black Belt 2nd Dan",
-            "role": "Senior Coach",
-            "location": "Gua, Jharkhand",
-            "phone": "+91 8510000838",
-            "email": "laxmi@example.com",
+            "_id": "tr_2",
+            "name": "Nethravathi M B",
+            "role": "Founder / Treasurer",
             "image_url": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=300&auto=format&fit=crop"
         },
         {
-            "_id": "inst_3",
-            "name": "Sensei Shiva",
-            "rank": "Black Belt 1st Dan",
-            "role": "Instructor (KFP)",
-            "location": "Moonga Nagar, Delhi",
-            "phone": "+91 9069118692",
-            "email": "shiva@example.com",
+            "_id": "tr_3",
+            "name": "Somashekhar S S",
+            "role": "Trustee",
+            "image_url": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=300&auto=format&fit=crop"
+        }
+    ],
+    "instructors": [
+        {
+            "_id": "inst_1",
+            "name": "Sensei Samarth S",
+            "rank": "Black Belt 3rd Dan",
+            "role": "Head Instructor",
+            "location": "Bangalore, Karnataka",
+            "phone": "+91 8510000838",
+            "email": "samarth@example.com",
             "image_url": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=300&auto=format&fit=crop"
         },
         {
+            "_id": "inst_2",
+            "name": "Sensei Pavan Kumar M",
+            "rank": "Black Belt 2nd Dan",
+            "role": "Head Examiner",
+            "location": "Bangalore, Karnataka",
+            "phone": "+91 6362630742",
+            "email": "pavankumarm209@gmail.com",
+            "image_url": "C:\\Users\\Pavan kumar M\\OneDrive\\Pictures\\Camera Roll\\1VE22CS109_PAVAN_KUMAR_M.jpeg"
+        },
+        {
+            "_id": "inst_3",
+            "name": "Sensei Chandana U S",
+            "rank": "Black Belt 2nd Dan",
+            "role": "Disciplinary Head and Data Analyst",
+            "location": "Bangalore, Karnataka",
+            "phone": "+91 77777 66666",
+            "email": "chandana@example.com",
+            "image_url": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=300&auto=format&fit=crop"
+        },
+        {
             "_id": "inst_4",
-            "name": "Sensei Lakshay Mittal",
-            "rank": "Black Belt 2nd Dan (KAI)",
-            "role": "Instructor",
-            "location": "Rama Vihar, Delhi",
-            "phone": "+91 9599712469",
-            "email": "lakshay@example.com",
-            "image_url": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=300&auto=format&fit=crop"
+            "name": "Sensei Nithyanandham P",
+            "rank": "Black Belt 2nd Dan",
+            "role": "Kata and Technical Head",
+            "location": "Bangalore, Karnataka",
+            "phone": "+91 9069118692",
+            "email": "nithyanandham@example.com",
+            "image_url": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=300&auto=format&fit=crop"
         },
         {
             "_id": "inst_5",
-            "name": "Sampai Rishap Yadav",
-            "rank": "Black Belt 1st Dan (GKSF)",
-            "role": "Assistant Instructor",
-            "location": "Mundka, Delhi",
-            "phone": "+91 9540607078",
-            "email": "rishap@example.com",
-            "image_url": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=300&auto=format&fit=crop"
+            "name": "Sensei Ajay P K",
+            "rank": "Black Belt 2nd Dan",
+            "role": "Kubudo Head",
+            "location": "Bangalore, Karnataka",
+            "phone": "+91 33333 22222",
+            "email": "ajay@example.com",
+            "image_url": "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?q=80&w=300&auto=format&fit=crop"
+        },
+        {
+            "_id": "inst_6",
+            "name": "Sensei Sannidhi S",
+            "rank": "Black Belt 2nd Dan",
+            "role": "Kumite and Kickboxing Head",
+            "location": "Bangalore, Karnataka",
+            "phone": "+91 55555 44444",
+            "email": "sannidhi@example.com",
+            "image_url": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=300&auto=format&fit=crop"
+        },
+        {
+            "_id": "inst_7",
+            "name": "Sensei Deva Dharshini",
+            "rank": "Black Belt 2nd Dan",
+            "role": "Tournament Head",
+            "location": "Bangalore, Karnataka",
+            "phone": "+91 22222 11111",
+            "email": "devadharshini@example.com",
+            "image_url": "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?q=80&w=300&auto=format&fit=crop"
+        },
+        {
+            "_id": "inst_8",
+            "name": "Sensei Rishith M",
+            "rank": "Black Belt 2nd Dan",
+            "role": "Media Officer and Financial Advisor",
+            "location": "Bangalore, Karnataka",
+            "phone": "+91 66666 55555",
+            "email": "rishith@example.com",
+            "image_url": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=300&auto=format&fit=crop"
         }
     ],
     "news": [
@@ -108,6 +158,68 @@
             "program": "Belt Grading",
             "date": "2026-06-12",
             "status": "Confirmed"
+        }
+    ],
+    "supporting_instructors": [
+        {
+            "_id": "supp_1",
+            "name": "Sempai Pallavi",
+            "rank": "Black Belt 1st Dan",
+            "role": "Supporting Instructor",
+            "location": "Bangalore, Karnataka",
+            "phone": "+91 99999 11111",
+            "email": "pallavi@example.com",
+            "image_url": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=300&auto=format&fit=crop"
+        },
+        {
+            "_id": "supp_2",
+            "name": "Sempai Yashaswini M",
+            "rank": "Black Belt 1st Dan",
+            "role": "Supporting Instructor",
+            "location": "Bangalore, Karnataka",
+            "phone": "+91 99999 22222",
+            "email": "yashaswini@example.com",
+            "image_url": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=300&auto=format&fit=crop"
+        },
+        {
+            "_id": "supp_3",
+            "name": "Sempai Shravya S Hegde",
+            "rank": "Black Belt 1st Dan",
+            "role": "Supporting Instructor",
+            "location": "Bangalore, Karnataka",
+            "phone": "+91 99999 33333",
+            "email": "shravya@example.com",
+            "image_url": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=300&auto=format&fit=crop"
+        },
+        {
+            "_id": "supp_4",
+            "name": "Sempai Trisha",
+            "rank": "Black Belt 1st Dan",
+            "role": "Supporting Instructor",
+            "location": "Bangalore, Karnataka",
+            "phone": "+91 99999 44444",
+            "email": "trisha@example.com",
+            "image_url": "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?q=80&w=300&auto=format&fit=crop"
+        },
+        {
+            "_id": "supp_5",
+            "name": "Sempai Phanindra Achari V",
+            "rank": "Black Belt 1st Dan",
+            "role": "Supporting Instructor",
+            "location": "Bangalore, Karnataka",
+            "phone": "+91 99999 55555",
+            "email": "phanindra@example.com",
+            "image_url": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=300&auto=format&fit=crop"
+        },
+        {
+            "name": "Sempai Test User",
+            "rank": "Black Belt 1st Dan",
+            "role": "Trainer",
+            "location": "Bangalore",
+            "phone": "+91 99999 99999",
+            "email": "",
+            "image_url": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=300&auto=format&fit=crop",
+            "_id": "supp_15"
         }
     ]
 }

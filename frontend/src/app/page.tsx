@@ -26,6 +26,13 @@ interface Instructor {
   image_url: string;
 }
 
+interface Trustee {
+  _id?: string;
+  name: string;
+  role: string;
+  image_url: string;
+}
+
 interface NewsItem {
   _id?: string;
   title: string;
@@ -38,6 +45,8 @@ interface NewsItem {
 export default function Home() {
   const [dojoInfo, setDojoInfo] = useState<DojoInfo | null>(null);
   const [instructors, setInstructors] = useState<Instructor[]>([]);
+  const [supportingInstructors, setSupportingInstructors] = useState<Instructor[]>([]);
+  const [trustees, setTrustees] = useState<Trustee[]>([]);
   const [news, setNews] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCity, setSelectedCity] = useState("All");
@@ -119,10 +128,12 @@ export default function Home() {
     async function loadData() {
       try {
         setLoading(true);
-        const [infoRes, instRes, newsRes] = await Promise.all([
+        const [infoRes, instRes, newsRes, trusteeRes, supportingRes] = await Promise.all([
           fetch("/api/dojo-info").catch(() => null),
           fetch("/api/instructors").catch(() => null),
-          fetch("/api/news").catch(() => null)
+          fetch("/api/news").catch(() => null),
+          fetch("/api/trustees").catch(() => null),
+          fetch("/api/supporting-instructors").catch(() => null)
         ]);
 
         if (infoRes && infoRes.ok) {
@@ -130,13 +141,13 @@ export default function Home() {
           setDojoInfo(infoData);
         } else {
           setDojoInfo({
-            name: "Okinawa Goju Ryu Karate Do",
+            name: "Okinawa Shotokon Karate Do",
             phone: "+91 85100 00838",
             email: "contact@internationalkarate.in",
             address: "X-1/32, Daal Mill Road, Budh Vihar, Phase-1, New Delhi-110086, India",
             map_embed: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3498.4239857905183!2d77.098485!3d28.736785!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390d068593a201c1%3A0xe54fb7a28e932ec3!2sBudh%20Vihar%20Phase%20I%2C%20Budh%20Vihar%2C%20Delhi%2C%20110086!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin",
             affiliations: [
-              { name: "Goju-Ryu Karate-Do Sports Federation" },
+              { name: "Shotokon Karate-Do Sports Federation" },
               { name: "Martial Arts Games Federation of India (MGFI)" },
               { name: "Karate India Organisation (KIO)" },
               { name: "Delhi Olympic Association" }
@@ -147,6 +158,90 @@ export default function Home() {
         if (instRes && instRes.ok) {
           const instData = await instRes.json();
           setInstructors(instData);
+        }
+
+        if (trusteeRes && trusteeRes.ok) {
+          const trusteeData = await trusteeRes.json();
+          setTrustees(trusteeData);
+        } else {
+          setTrustees([
+            {
+              _id: "tr_1",
+              name: "Renshi Umapathi S S",
+              role: "Founder, President & Chief Coach",
+              image_url: "/umapathi_ss.png"
+            },
+            {
+              _id: "tr_2",
+              name: "Nethravathi M B",
+              role: "Founder / Treasurer",
+              image_url: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=300&auto=format&fit=crop"
+            },
+            {
+              _id: "tr_3",
+              name: "Somashekhar S S",
+              role: "Trustee",
+              image_url: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=300&auto=format&fit=crop"
+            }
+          ]);
+        }
+
+        if (supportingRes && supportingRes.ok) {
+          const supportingData = await supportingRes.json();
+          setSupportingInstructors(supportingData);
+        } else {
+          setSupportingInstructors([
+            {
+              _id: "supp_1",
+              name: "Sempai Pallavi",
+              rank: "Black Belt 1st Dan",
+              role: "Supporting Instructor",
+              location: "Bangalore, Karnataka",
+              phone: "+91 99999 11111",
+              email: "pallavi@example.com",
+              image_url: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=300&auto=format&fit=crop"
+            },
+            {
+              _id: "supp_2",
+              name: "Sempai Yashaswini M",
+              rank: "Black Belt 1st Dan",
+              role: "Supporting Instructor",
+              location: "Bangalore, Karnataka",
+              phone: "+91 99999 22222",
+              email: "yashaswini@example.com",
+              image_url: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=300&auto=format&fit=crop"
+            },
+            {
+              _id: "supp_3",
+              name: "Sempai Shravya S Hegde",
+              rank: "Black Belt 1st Dan",
+              role: "Supporting Instructor",
+              location: "Bangalore, Karnataka",
+              phone: "+91 99999 33333",
+              email: "shravya@example.com",
+              image_url: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=300&auto=format&fit=crop"
+            },
+            {
+              _id: "supp_4",
+              name: "Sempai Trisha",
+              rank: "Black Belt 1st Dan",
+              role: "Supporting Instructor",
+              location: "Bangalore, Karnataka",
+              phone: "+91 99999 44444",
+              email: "trisha@example.com",
+              image_url: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?q=80&w=300&auto=format&fit=crop"
+            },
+            {
+              _id: "supp_5",
+              name: "Sempai Phanindra Achari V",
+              rank: "Black Belt 1st Dan",
+              role: "Supporting Instructor",
+              location: "Bangalore, Karnataka",
+              phone: "+91 99999 55555",
+              email: "phanindra@example.com",
+              image_url: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=300&auto=format&fit=crop"
+            }
+          ]);
         }
 
         if (newsRes && newsRes.ok) {
@@ -232,18 +327,20 @@ export default function Home() {
       <header className="border-b border-slate-905 bg-slate-950/80 backdrop-blur-md sticky top-0 z-50 transition-all duration-300">
         <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img
-              src="/logo_karate.jpg"
-              alt="Dojo Logo"
-              className="h-12 w-12 object-contain filter drop-shadow-[0_2px_8px_rgba(239,68,68,0.2)] rounded-full"
-              onError={(e) => {
-                // Fallback if logo fails to load
-                e.currentTarget.style.display = "none";
-              }}
-            />
+            <div className="relative group flex-shrink-0">
+              <div className="absolute -inset-0.5 rounded-full bg-gradient-to-r from-red-600 to-amber-500 opacity-70 blur-sm group-hover:opacity-100 transition duration-350 animate-pulse" />
+              <img
+                src="/logo_karate.jpg"
+                alt="Dojo Logo"
+                className="relative h-12 w-12 object-contain rounded-full border border-red-500/30 bg-slate-950 p-0.5 shadow-md shadow-red-950/30"
+                onError={(e) => {
+                  e.currentTarget.style.display = "none";
+                }}
+              />
+            </div>
             <div>
               <span className="text-lg font-black tracking-wider bg-gradient-to-r from-white via-red-300 to-amber-400 bg-clip-text text-transparent uppercase">
-                {dojoInfo?.name || "Okinawa Goju Ryu"}
+                {dojoInfo?.name || "Okinawa Shotokon"}
               </span>
               <span className="block text-[9px] text-red-500 font-mono tracking-widest uppercase">
                 Karate Do Sports Federation
@@ -256,6 +353,7 @@ export default function Home() {
             <a href="#home" className="text-red-400 hover:text-red-300 transition-colors">Home</a>
             <a href="#about" className="text-slate-300 hover:text-red-400 transition-colors">Path to Olympics</a>
             <a href="#belts" className="text-slate-300 hover:text-red-400 transition-colors">Belts</a>
+            <a href="#trustees" className="text-slate-300 hover:text-red-400 transition-colors">Trustees</a>
             <a href="#instructors" className="text-slate-300 hover:text-red-400 transition-colors">Instructors</a>
             <a href="#news" className="text-slate-300 hover:text-red-400 transition-colors">News</a>
             <a href="#contact" className="text-slate-300 hover:text-red-400 transition-colors">Contact</a>
@@ -276,7 +374,22 @@ export default function Home() {
         
         {/* HERO SECTION */}
         <section id="home" className="max-w-7xl mx-auto px-6 pt-12 pb-20 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
+          <div className="lg:col-span-7 space-y-6 text-center lg:text-left flex flex-col items-center lg:items-start">
+            {/* Attention Grabbing Academy Logo */}
+            <div className="relative group mb-4">
+              <div className="absolute -inset-1.5 rounded-full bg-gradient-to-r from-red-600 to-amber-500 opacity-80 blur-xl group-hover:opacity-100 transition duration-700 animate-[pulse_3s_infinite]" />
+              <div className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden border-2 border-red-500 bg-slate-950 p-1.5 flex items-center justify-center shadow-[0_0_50px_rgba(239,68,68,0.25)]">
+                <img
+                  src="/logo_karate.jpg"
+                  alt="Sky Bound Karate Logo"
+                  className="w-full h-full object-contain rounded-full"
+                  onError={(e) => {
+                    e.currentTarget.src = "https://images.unsplash.com/photo-1555597673-b21d5c935865?q=80&w=200&auto=format&fit=crop";
+                  }}
+                />
+              </div>
+            </div>
+
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-semibold">
               <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
               Now Enrolling: Ages 4+
@@ -284,7 +397,7 @@ export default function Home() {
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-tight">
               Learn Real Martial Arts, <br />
               <span className="bg-gradient-to-r from-red-500 via-red-400 to-amber-500 bg-clip-text text-transparent">
-                {dojoInfo?.name || "Okinawa Goju Ryu Karate Do"}
+                {dojoInfo?.name || "Okinawa Shotokon Karate Do"}
               </span>
             </h1>
             <p className="text-slate-400 text-base sm:text-lg max-w-2xl mx-auto lg:mx-0 leading-relaxed">
@@ -356,7 +469,7 @@ export default function Home() {
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-80" />
               
               <div className="absolute bottom-6 left-6 right-6">
-                <p className="text-xs font-mono text-red-500 uppercase tracking-widest">Okinawa Goju-Ryu</p>
+                <p className="text-xs font-mono text-red-500 uppercase tracking-widest">Okinawa Shotokon</p>
                 <h3 className="text-lg font-bold text-white">Traditional Kata & Kumite</h3>
               </div>
             </div>
@@ -469,7 +582,7 @@ export default function Home() {
               <h2 className="text-xs font-mono text-red-500 uppercase tracking-widest">Kyu & Dan Progression</h2>
               <h3 className="text-3xl sm:text-4xl font-black text-white leading-tight">Interactive Belt Syllabus</h3>
               <p className="text-slate-400 text-sm leading-relaxed">
-                {"In Goju-Ryu Karate, belts represent a student's technical growth, mental maturity, and duration of training. Click on any belt color to see the requirements and meaning of that level."}
+                {"In Shotokon Karate, belts represent a student's technical growth, mental maturity, and duration of training. Click on any belt color to see the requirements and meaning of that level."}
               </p>
 
               {/* Belt Selector Bar */}
@@ -534,6 +647,78 @@ export default function Home() {
           </div>
         </section>
 
+        {/* LEADERSHIP & TRUSTEES SECTION */}
+        {trustees.length > 0 && (
+          <section id="trustees" className="max-w-7xl mx-auto px-6 py-20 border-t border-slate-900">
+            <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
+              <h2 className="text-xs font-mono text-red-500 uppercase tracking-widest font-bold">Leadership & Administration</h2>
+              <p className="text-3xl sm:text-4xl font-black text-white">Our Leadership</p>
+              <p className="text-slate-400 text-sm">
+                The governing body guiding the vision, financial integrity, and growth of Sky Bound Martial Arts Academy.
+              </p>
+            </div>
+
+            {/* Founder / President Section */}
+            {trustees.filter(tr => tr.name.toLowerCase().includes("umapathi")).map((tr) => (
+              <div key={tr._id} className="max-w-md mx-auto mb-12">
+                <article className="group rounded-3xl bg-gradient-to-b from-red-950/20 via-slate-900/30 to-slate-900/45 border-2 border-red-500/30 hover:border-red-500 overflow-hidden flex flex-col items-center p-8 text-center shadow-2xl transition-all duration-300 hover:translate-y-[-4px] shadow-red-950/20">
+                  <span className="mb-3 px-3 py-1 rounded-full text-[9px] font-bold bg-red-500/10 border border-red-500/20 text-red-400 uppercase tracking-widest">
+                    Renshi / Chief Coach
+                  </span>
+                  <div className="relative w-36 h-36 rounded-full overflow-hidden border border-red-500/40 group-hover:border-red-500 ring-4 ring-red-500/10 mb-6 bg-slate-950">
+                    <img
+                      src={tr.image_url}
+                      alt={tr.name}
+                      className="object-cover w-full h-full object-center group-hover:scale-105 transition-transform duration-500"
+                      onError={(e) => {
+                        e.currentTarget.src = "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=300&auto=format&fit=crop";
+                      }}
+                    />
+                  </div>
+                  <h3 className="text-xl font-bold text-white group-hover:text-red-400 transition-colors">
+                    {tr.name}
+                  </h3>
+                  <p className="text-xs font-mono text-slate-400 uppercase tracking-wider mt-1.5">
+                    {tr.role}
+                  </p>
+                </article>
+              </div>
+            ))}
+
+            {/* Other Trustees Section */}
+            {trustees.filter(tr => !tr.name.toLowerCase().includes("umapathi")).length > 0 && (
+              <div className="space-y-6 mt-16 pt-8 border-t border-slate-900/40">
+                <h4 className="text-center text-xs font-mono text-slate-500 uppercase tracking-widest mb-8">Board Trustees</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 justify-center max-w-3xl mx-auto">
+                  {trustees.filter(tr => !tr.name.toLowerCase().includes("umapathi")).map((tr) => (
+                    <article
+                      key={tr._id}
+                      className="group rounded-3xl bg-slate-900/20 border border-slate-900 hover:border-red-950 overflow-hidden flex flex-col items-center p-6 text-center shadow-xl transition-all duration-300 hover:translate-y-[-4px] hover:bg-slate-900/50"
+                    >
+                      <div className="relative w-28 h-28 rounded-full overflow-hidden border border-slate-800 mb-4 bg-slate-950">
+                        <img
+                          src={tr.image_url}
+                          alt={tr.name}
+                          className="object-cover w-full h-full object-center group-hover:scale-105 transition-transform duration-500"
+                          onError={(e) => {
+                            e.currentTarget.src = "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=300&auto=format&fit=crop";
+                          }}
+                        />
+                      </div>
+                      <h3 className="text-lg font-bold text-white group-hover:text-red-400 transition-colors">
+                        {tr.name}
+                      </h3>
+                      <p className="text-xs font-mono text-slate-500 uppercase tracking-wider mt-1">
+                        {tr.role}
+                      </p>
+                    </article>
+                  ))}
+                </div>
+              </div>
+            )}
+          </section>
+        )}
+
         {/* FINEST COACHES SECTION */}
         <section id="instructors" className="max-w-7xl mx-auto px-6 py-20 border-t border-slate-900">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
@@ -541,7 +726,7 @@ export default function Home() {
               <h2 className="text-xs font-mono text-red-500 uppercase tracking-widest font-bold">Elite Instructors</h2>
               <p className="text-3xl sm:text-4xl font-black text-white">Finest Coaches of India</p>
               <p className="text-slate-400 text-sm max-w-xl">
-                Our Senseis are affiliated with the Goju-Ryu Karate-Do Sports Federation and carry decades of combined martial arts experience.
+                Our Senseis are affiliated with the Shotokon Karate-Do Sports Federation and carry decades of combined martial arts experience.
               </p>
             </div>
 
@@ -634,6 +819,48 @@ export default function Home() {
             </div>
           )}
         </section>
+
+        {/* SUPPORTING INSTRUCTORS SECTION */}
+        {supportingInstructors.length > 0 && (
+          <section id="supporting" className="max-w-7xl mx-auto px-6 py-20 border-t border-slate-900">
+            <div className="text-center max-w-2xl mx-auto mb-12 space-y-3">
+              <h2 className="text-xs font-mono text-red-500 uppercase tracking-widest font-bold">Supporting Team</h2>
+              <p className="text-3xl sm:text-4xl font-black text-white">Supporting Instructors</p>
+              <p className="text-slate-400 text-sm">
+                Our dedicated assistant coaches and trainers helping students master their karate basics.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 justify-center">
+              {supportingInstructors.map((inst) => (
+                <article
+                  key={inst._id}
+                  className="group rounded-2xl bg-slate-900/10 border border-slate-900 hover:border-red-950/40 p-4 flex flex-col items-center text-center shadow-lg transition-all duration-300 hover:translate-y-[-2px] hover:bg-slate-900/40"
+                >
+                  <div className="relative w-24 h-24 rounded-full overflow-hidden border border-slate-800 mb-3 bg-slate-950">
+                    <img
+                      src={inst.image_url}
+                      alt={inst.name}
+                      className="object-cover w-full h-full object-center group-hover:scale-105 transition-transform duration-500"
+                      onError={(e) => {
+                        e.currentTarget.src = "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200&auto=format&fit=crop";
+                      }}
+                    />
+                  </div>
+                  <h3 className="text-sm font-bold text-white group-hover:text-red-400 transition-colors line-clamp-1">
+                    {inst.name}
+                  </h3>
+                  <p className="text-[10px] font-mono text-slate-500 uppercase tracking-wider mt-0.5">
+                    {inst.role}
+                  </p>
+                  <span className="mt-2 px-2 py-0.5 rounded bg-slate-800/60 border border-slate-750 text-[9px] font-mono text-amber-500/80">
+                    {inst.rank}
+                  </span>
+                </article>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* LATEST NEWS & EVENTS SECTION */}
         <section id="news" className="max-w-7xl mx-auto px-6 py-20 border-t border-slate-900">
@@ -975,7 +1202,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-12 gap-8 mb-8">
           <div className="md:col-span-5 space-y-4">
             <h4 className="text-sm font-bold text-white uppercase tracking-wider">
-              {dojoInfo?.name || "Okinawa Goju Ryu Karate Do"}
+              {dojoInfo?.name || "Okinawa Shotokon Karate Do"}
             </h4>
             <p className="text-slate-400 text-xs leading-relaxed max-w-md">
               We provide authentic martial arts and self-defense training to students aged 4+ across India. Build speed, strength, and focus under GKSF affiliated Senseis.
@@ -1003,7 +1230,7 @@ export default function Home() {
         </div>
 
         <div className="max-w-7xl mx-auto px-6 pt-6 border-t border-slate-900 flex flex-col sm:flex-row items-center justify-between gap-4 text-[10px] font-mono">
-          <p>© {new Date().getFullYear()} {dojoInfo?.name || "Okinawa Goju Ryu"}. All Rights Reserved.</p>
+          <p>© {new Date().getFullYear()} {dojoInfo?.name || "Okinawa Shotokon"}. All Rights Reserved.</p>
           <div className="flex items-center gap-6">
             <span className="text-red-500/80">Affiliated with GKSF & KIO</span>
             <span className="text-slate-700">|</span>
