@@ -2,380 +2,631 @@
 
 import { useEffect, useState } from "react";
 
-interface Destination {
+interface Affiliation {
+  name: string;
+}
+
+interface DojoInfo {
+  name: string;
+  phone: string;
+  email: string;
+  address: string;
+  map_embed: string;
+  affiliations: Affiliation[];
+}
+
+interface Instructor {
   _id?: string;
-  title: string;
-  description: string;
-  difficulty: string;
-  altitude: string;
+  name: string;
+  rank: string;
+  role: string;
+  location: string;
+  phone: string;
+  email: string;
   image_url: string;
 }
 
-interface HealthStatus {
-  status: string;
-  database: string;
-  service: string;
+interface NewsItem {
+  _id?: string;
+  title: string;
+  organizer: string;
+  date: string;
+  description: string;
+  image_url: string;
 }
 
 export default function Home() {
-  const [destinations, setDestinations] = useState<Destination[]>([]);
-  const [health, setHealth] = useState<HealthStatus | null>(null);
+  const [dojoInfo, setDojoInfo] = useState<DojoInfo | null>(null);
+  const [instructors, setInstructors] = useState<Instructor[]>([]);
+  const [news, setNews] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [selectedCity, setSelectedCity] = useState("All");
 
-  // Form states
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [difficulty, setDifficulty] = useState("Medium");
-  const [altitude, setAltitude] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
-  const [showAddForm, setShowAddForm] = useState(false);
+  // Booking Modal States
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [studentName, setStudentName] = useState("");
+  const [studentAge, setStudentAge] = useState("");
+  const [phone, setPhone] = useState("");
+  const [program, setProgram] = useState("Regular Training");
+  const [bookingDate, setBookingDate] = useState("");
+  const [bookingSubmitting, setBookingSubmitting] = useState(false);
+  const [bookingSuccess, setBookingSuccess] = useState(false);
+  const [bookingError, setBookingError] = useState<string | null>(null);
 
-  // Fetch health and destinations
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      // Fetch from relative endpoints routed through Nginx proxy
-      const healthRes = await fetch("/api/health").catch(() => null);
-      if (healthRes && healthRes.ok) {
-        const healthData = await healthRes.json();
-        setHealth(healthData);
-      } else {
-        setHealth({ status: "offline", database: "offline", service: "Flask API (unreachable)" });
-      }
+  // Selected Belt Info State
+  const [activeBelt, setActiveBelt] = useState("white");
 
-      const destRes = await fetch("/api/destinations");
-      if (!destRes.ok) {
-        throw new Error("Failed to fetch destinations from backend");
-      }
-      const destData = await destRes.json();
-      setDestinations(destData);
-    } catch (err: any) {
-      console.error(err);
-      setError(err.message || "An error occurred while loading data from the server.");
-    } finally {
-      setLoading(false);
+  const beltData: Record<string, { title: string; kyu: string; desc: string; color: string; border: string }> = {
+    white: {
+      title: "White Belt",
+      kyu: "10th Kyu",
+      desc: "Foundation, purity, and the beginning of a practitioner's martial arts journey. Focuses on basic stances, blocks, and strikes.",
+      color: "bg-white text-slate-900",
+      border: "border-slate-300"
+    },
+    yellow: {
+      title: "Yellow Belt",
+      kyu: "9th & 8th Kyu",
+      desc: "Represents the first ray of sunlight. Focuses on developing body control, balance, and basic footwork combinations.",
+      color: "bg-amber-400 text-slate-950",
+      border: "border-amber-500"
+    },
+    orange: {
+      title: "Orange Belt",
+      kyu: "7th Kyu",
+      desc: "Represents the spreading of light. Introduces advanced defensive motions, counter-striking, and basic sparring (Kumite).",
+      color: "bg-orange-500 text-white",
+      border: "border-orange-600"
+    },
+    green: {
+      title: "Green Belt",
+      kyu: "6th & 5th Kyu",
+      desc: "Represents growth and roots digging deep. Focus is placed on power generation, breathing techniques, and Gekisai Katas.",
+      color: "bg-emerald-600 text-white",
+      border: "border-emerald-700"
+    },
+    blue: {
+      title: "Blue Belt",
+      kyu: "4th Kyu",
+      desc: "Represents the sky towards which the plant grows. Emphasizes fluid movement, agility, and sweep counter-techniques.",
+      color: "bg-blue-600 text-white",
+      border: "border-blue-700"
+    },
+    purple: {
+      title: "Purple Belt",
+      kyu: "3rd Kyu",
+      desc: "Represents transition and depth of technique. Advanced circular movements and defense-to-offense transitions are mastered.",
+      color: "bg-purple-600 text-white",
+      border: "border-purple-700"
+    },
+    brown: {
+      title: "Brown Belt",
+      kyu: "2nd & 1st Kyu",
+      desc: "Represents the ripening of a seed. Focus shifts to internal energy, breathing patterns (Sanchin), and tactical defense.",
+      color: "bg-amber-800 text-white",
+      border: "border-amber-950"
+    },
+    black: {
+      title: "Black Belt",
+      kyu: "1st Dan & Above",
+      desc: "The culmination of core training, representing mastery of the basics and the birth of a true karate practitioner.",
+      color: "bg-slate-950 text-amber-400 border border-amber-500/50",
+      border: "border-amber-500"
     }
   };
 
   useEffect(() => {
-    fetchData();
+    async function loadData() {
+      try {
+        setLoading(true);
+        const [infoRes, instRes, newsRes] = await Promise.all([
+          fetch("/api/dojo-info").catch(() => null),
+          fetch("/api/instructors").catch(() => null),
+          fetch("/api/news").catch(() => null)
+        ]);
+
+        if (infoRes && infoRes.ok) {
+          const infoData = await infoRes.json();
+          setDojoInfo(infoData);
+        } else {
+          setDojoInfo({
+            name: "Okinawa Goju Ryu Karate Do",
+            phone: "+91 85100 00838",
+            email: "contact@internationalkarate.in",
+            address: "X-1/32, Daal Mill Road, Budh Vihar, Phase-1, New Delhi-110086, India",
+            map_embed: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3498.4239857905183!2d77.098485!3d28.736785!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390d068593a201c1%3A0xe54fb7a28e932ec3!2sBudh%20Vihar%20Phase%20I%2C%20Budh%20Vihar%2C%20Delhi%2C%20110086!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin",
+            affiliations: [
+              { name: "Goju-Ryu Karate-Do Sports Federation" },
+              { name: "Martial Arts Games Federation of India (MGFI)" },
+              { name: "Karate India Organisation (KIO)" },
+              { name: "Delhi Olympic Association" }
+            ]
+          });
+        }
+
+        if (instRes && instRes.ok) {
+          const instData = await instRes.json();
+          setInstructors(instData);
+        }
+
+        if (newsRes && newsRes.ok) {
+          const newsData = await newsRes.json();
+          setNews(newsData);
+        }
+      } catch (error) {
+        console.error("Failed to fetch dojo data", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleBookingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title || !description) return;
+    setBookingError(null);
+
+    const age = parseInt(studentAge);
+    if (isNaN(age) || age < 4) {
+      setBookingError("Karate classes are designed for ages 4 and above.");
+      return;
+    }
 
     try {
-      setSubmitting(true);
-      const res = await fetch("/api/destinations", {
+      setBookingSubmitting(true);
+      const res = await fetch("/api/bookings", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          title,
-          description,
-          difficulty,
-          altitude: altitude || "N/A",
-          image_url: imageUrl || "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=600&auto=format&fit=crop",
+          student_name: studentName,
+          student_age: age,
+          phone: phone,
+          program: program,
+          date: bookingDate,
         }),
       });
 
       if (!res.ok) {
-        throw new Error("Failed to add destination");
+        throw new Error("Failed to submit booking request. Please check details.");
       }
 
-      const newDest = await res.json();
-      setDestinations((prev) => [...prev, newDest]);
-      
-      // Reset form
-      setTitle("");
-      setDescription("");
-      setDifficulty("Medium");
-      setAltitude("");
-      setImageUrl("");
-      setShowAddForm(false);
-    } catch (err: any) {
-      alert(err.message || "Failed to submit new destination");
+      setBookingSuccess(true);
+      setTimeout(() => {
+        // Reset states
+        setStudentName("");
+        setStudentAge("");
+        setPhone("");
+        setBookingDate("");
+        setBookingSuccess(false);
+        setShowBookingModal(false);
+      }, 2500);
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : "Something went wrong.";
+      setBookingError(errorMsg);
     } finally {
-      setSubmitting(false);
+      setBookingSubmitting(false);
     }
   };
 
+  // Extract unique cities from instructors to display in filters
+  const cities = ["All", ...Array.from(new Set(instructors.map((inst) => {
+    const parts = inst.location.split(",");
+    return parts[parts.length - 1].trim();
+  })))];
+
+  const filteredInstructors = selectedCity === "All"
+    ? instructors
+    : instructors.filter((inst) => inst.location.toLowerCase().includes(selectedCity.toLowerCase()));
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-indigo-500 selection:text-white">
-      {/* Background decoration */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-indigo-900/20 blur-[120px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-violet-900/20 blur-[120px]" />
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-red-500 selection:text-white relative font-sans overflow-x-hidden">
+      {/* Background radial glow */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="absolute top-[-10%] left-[-15%] w-[60%] h-[60%] rounded-full bg-red-900/10 blur-[150px]" />
+        <div className="absolute bottom-[20%] right-[-15%] w-[60%] h-[60%] rounded-full bg-amber-900/10 blur-[150px]" />
       </div>
 
-      {/* Header */}
-      <header className="border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-md sticky top-0 z-50 transition-all duration-300">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      {/* Header / Navbar */}
+      <header className="border-b border-slate-905 bg-slate-950/80 backdrop-blur-md sticky top-0 z-50 transition-all duration-300">
+        <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-              <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-              </svg>
-            </div>
+            <img
+              src="/logo_karate.jpg"
+              alt="Dojo Logo"
+              className="h-12 w-12 object-contain filter drop-shadow-[0_2px_8px_rgba(239,68,68,0.2)] rounded-full"
+              onError={(e) => {
+                // Fallback if logo fails to load
+                e.currentTarget.style.display = "none";
+              }}
+            />
             <div>
-              <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-white via-indigo-200 to-violet-400 bg-clip-text text-transparent">
-                SKYBOUND
+              <span className="text-lg font-black tracking-wider bg-gradient-to-r from-white via-red-300 to-amber-400 bg-clip-text text-transparent uppercase">
+                {dojoInfo?.name || "Okinawa Goju Ryu"}
               </span>
-              <span className="block text-[10px] text-indigo-400/80 font-mono tracking-widest uppercase">
-                Aero Adventures
+              <span className="block text-[9px] text-red-500 font-mono tracking-widest uppercase">
+                Karate Do Sports Federation
               </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
-            {/* Health Indicator Badge */}
-            {health && (
-              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-xs">
-                <span className="relative flex h-2 w-2">
-                  <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
-                    health.status === "healthy" ? "bg-emerald-400" : "bg-rose-400"
-                  }`}></span>
-                  <span className={`relative inline-flex rounded-full h-2 w-2 ${
-                    health.status === "healthy" ? "bg-emerald-500" : "bg-rose-500"
-                  }`}></span>
-                </span>
-                <span className="text-slate-400 font-mono">
-                  API: {health.status === "healthy" ? "Online" : "Offline"}
-                </span>
-              </div>
-            )}
+          {/* Nav items */}
+          <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
+            <a href="#home" className="text-red-400 hover:text-red-300 transition-colors">Home</a>
+            <a href="#about" className="text-slate-300 hover:text-red-400 transition-colors">Path to Olympics</a>
+            <a href="#belts" className="text-slate-300 hover:text-red-400 transition-colors">Belts</a>
+            <a href="#instructors" className="text-slate-300 hover:text-red-400 transition-colors">Instructors</a>
+            <a href="#news" className="text-slate-300 hover:text-red-400 transition-colors">News</a>
+            <a href="#contact" className="text-slate-300 hover:text-red-400 transition-colors">Contact</a>
+            <a href="/admin" className="text-slate-500 hover:text-slate-300 font-mono text-xs border border-slate-800 px-2 py-1 rounded">Admin</a>
+          </nav>
 
-            <button
-              onClick={() => setShowAddForm(!showAddForm)}
-              className="px-4 py-2 rounded-xl text-sm font-semibold bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white transition-all shadow-md shadow-indigo-950 hover:shadow-indigo-900 active:scale-95"
-            >
-              {showAddForm ? "Close Form" : "Add Destination"}
-            </button>
-          </div>
+          <button
+            onClick={() => setShowBookingModal(true)}
+            className="px-5 py-2.5 rounded-full text-xs font-bold bg-gradient-to-r from-red-600 to-amber-500 hover:from-red-700 hover:to-amber-600 text-white shadow-lg shadow-red-950/50 hover:shadow-red-900/50 hover:scale-[1.03] transition-all duration-200 active:scale-95 z-10"
+          >
+            Free Trial Class
+          </button>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-6 py-10 relative z-10">
+      {/* Main Container */}
+      <main className="flex-1 w-full mx-auto relative z-10">
         
-        {/* Intro Hero Section */}
-        <section className="mb-12 text-center sm:text-left">
-          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight mb-4 text-white">
-            Explore the World's{" "}
-            <span className="bg-gradient-to-r from-indigo-400 to-violet-500 bg-clip-text text-transparent">
-              Highest Peaks & Wonders
-            </span>
-          </h1>
-          <p className="text-slate-400 text-lg max-w-2xl">
-            A full-stack showcase connecting Next.js, Flask, MongoDB, and Nginx. Explore high-altitude destinations or add your own skybound adventures below.
-          </p>
-        </section>
-
-        {/* Form Container (Collapsible) */}
-        {showAddForm && (
-          <section className="mb-12 p-6 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-xl animate-in fade-in slide-in-from-top-4 duration-300 max-w-2xl">
-            <h2 className="text-xl font-bold mb-4 text-white flex items-center gap-2">
-              <svg className="w-5 h-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              Add New Skybound Adventure
-            </h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-mono text-slate-400 uppercase mb-1.5">Destination Title</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g., Mount Fuji, Japan"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-100 placeholder-slate-500 outline-none transition"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-mono text-slate-400 uppercase mb-1.5">Altitude / Elevation</label>
-                  <input
-                    type="text"
-                    placeholder="e.g., 3,776m"
-                    value={altitude}
-                    onChange={(e) => setAltitude(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-100 placeholder-slate-500 outline-none transition"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-mono text-slate-400 uppercase mb-1.5">Difficulty Level</label>
-                  <select
-                    value={difficulty}
-                    onChange={(e) => setDifficulty(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-100 outline-none transition"
-                  >
-                    <option value="Easy">Easy (Leisurely)</option>
-                    <option value="Medium">Medium (Moderate Climb)</option>
-                    <option value="Hard">Hard (Experienced Hikers)</option>
-                    <option value="Extreme">Extreme (Pro Mountaineers)</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-mono text-slate-400 uppercase mb-1.5">Image URL</label>
-                  <input
-                    type="url"
-                    placeholder="https://images.unsplash.com/..."
-                    value={imageUrl}
-                    onChange={(e) => setImageUrl(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-100 placeholder-slate-500 outline-none transition"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-mono text-slate-400 uppercase mb-1.5">Description</label>
-                <textarea
-                  required
-                  rows={3}
-                  placeholder="Describe the adventure, trails, and scenic sky views..."
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-100 placeholder-slate-500 outline-none transition resize-none"
-                />
-              </div>
-
-              <div className="flex justify-end gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowAddForm(false)}
-                  className="px-4 py-2 rounded-xl text-sm font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="px-5 py-2 rounded-xl text-sm font-semibold bg-indigo-500 hover:bg-indigo-600 text-white transition disabled:opacity-50 flex items-center gap-2"
-                >
-                  {submitting && (
-                    <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                    </svg>
-                  )}
-                  {submitting ? "Adding..." : "Save Destination"}
-                </button>
-              </div>
-            </form>
-          </section>
-        )}
-
-        {/* Display Status or Errors */}
-        {error && (
-          <div className="mb-8 p-4 rounded-xl bg-rose-950/40 border border-rose-900/50 text-rose-200 flex items-start gap-3">
-            <svg className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-            <div>
-              <h3 className="font-bold text-sm">Connection Warning</h3>
-              <p className="text-xs text-rose-300 mt-1">{error}</p>
-              <button 
-                onClick={fetchData} 
-                className="mt-2 text-xs font-semibold text-rose-400 hover:text-rose-300 underline"
+        {/* HERO SECTION */}
+        <section id="home" className="max-w-7xl mx-auto px-6 pt-12 pb-20 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-semibold">
+              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+              Now Enrolling: Ages 4+
+            </div>
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-tight">
+              Learn Real Martial Arts, <br />
+              <span className="bg-gradient-to-r from-red-500 via-red-400 to-amber-500 bg-clip-text text-transparent">
+                {dojoInfo?.name || "Okinawa Goju Ryu Karate Do"}
+              </span>
+            </h1>
+            <p className="text-slate-400 text-base sm:text-lg max-w-2xl mx-auto lg:mx-0 leading-relaxed">
+              Discover self-defense, build bulletproof self-discipline, and walk the path towards local, national, and Olympic karate championships. Learn from highly experienced Senseis.
+            </p>
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-2">
+              <button
+                onClick={() => setShowBookingModal(true)}
+                className="px-8 py-3.5 rounded-xl font-bold bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-950 transition-all duration-200 active:scale-95"
               >
-                Retry connection
+                Book Free Trial
               </button>
+              <a
+                href="#contact"
+                className="px-8 py-3.5 rounded-xl font-bold bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 transition-all duration-200"
+              >
+                Contact Dojo
+              </a>
+            </div>
+
+            {/* Quick Stats */}
+            <div className="grid grid-cols-3 gap-6 pt-8 border-t border-slate-900 max-w-md mx-auto lg:mx-0">
+              <div>
+                <p className="text-2xl sm:text-3xl font-black text-white">100%</p>
+                <p className="text-[10px] sm:text-xs text-slate-500 uppercase tracking-wider font-mono">Self Defense Focused</p>
+              </div>
+              <div>
+                <p className="text-2xl sm:text-3xl font-black text-red-500">Every 3m</p>
+                <p className="text-[10px] sm:text-xs text-slate-500 uppercase tracking-wider font-mono">Belt Grading Exams</p>
+              </div>
+              <div>
+                <p className="text-2xl sm:text-3xl font-black text-amber-500">KIO / WKF</p>
+                <p className="text-[10px] sm:text-xs text-slate-500 uppercase tracking-wider font-mono">Official Affiliation</p>
+              </div>
             </div>
           </div>
-        )}
 
-        {/* Destinations grid */}
-        <section>
-          <h2 className="text-2xl font-bold mb-6 text-white flex items-center gap-2">
-            <svg className="w-6 h-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-            Active Expeditions ({destinations.length})
-          </h2>
+          {/* Hero Images Area */}
+          <div className="lg:col-span-5 relative flex items-center justify-center h-[350px] sm:h-[450px]">
+            {/* Soft background shape decoration */}
+            <div className="absolute w-[80%] h-[80%] rounded-full bg-gradient-to-tr from-red-600/10 to-amber-500/10 blur-3xl -z-10" />
+            
+            {/* Cartoon Mascot (floating) */}
+            <div className="absolute left-[-20px] top-6 w-32 sm:w-44 aspect-square bg-slate-900/60 border border-slate-800 rounded-2xl p-2.5 backdrop-blur-md shadow-2xl animate-[bounce_4s_infinite] z-20">
+              <img
+                src="/cartoon_karate_kid.png"
+                alt="Karate Mascot"
+                className="w-full h-full object-contain rounded-xl"
+                onError={(e) => {
+                  e.currentTarget.src = "https://images.unsplash.com/photo-1555597673-b21d5c935865?q=80&w=200&auto=format&fit=crop";
+                }}
+              />
+              <span className="absolute -bottom-2 right-2 bg-red-600 text-white font-black text-[9px] uppercase px-2 py-0.5 rounded-full border border-slate-900">
+                Kids Class
+              </span>
+            </div>
 
-          {loading ? (
-            /* Skeleton Loading State */
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[1, 2, 3].map((n) => (
-                <div key={n} className="rounded-2xl bg-slate-900/40 border border-slate-800/60 overflow-hidden h-[380px] animate-pulse flex flex-col justify-between p-6">
-                  <div className="w-full h-44 rounded-xl bg-slate-800" />
-                  <div className="space-y-3 mt-4 flex-1">
-                    <div className="h-6 w-2/3 bg-slate-800 rounded-md" />
-                    <div className="h-4 w-full bg-slate-800 rounded-md" />
-                    <div className="h-4 w-4/5 bg-slate-800 rounded-md" />
-                  </div>
-                  <div className="h-8 w-24 bg-slate-800 rounded-md self-start" />
+            {/* Main Karate Practitioner Image */}
+            <div className="relative w-[90%] h-full rounded-2xl overflow-hidden border border-slate-800 bg-slate-900/40 shadow-2xl flex items-center justify-center">
+              <img
+                src="/karate_practitioner.png"
+                alt="Karate Practitioner Kick"
+                className="object-cover w-full h-full object-center hover:scale-[1.03] transition-transform duration-700"
+                onError={(e) => {
+                  e.currentTarget.src = "https://images.unsplash.com/photo-1517649763962-0c623066013b?q=80&w=600&auto=format&fit=crop";
+                }}
+              />
+              {/* Overlay gradient */}
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-80" />
+              
+              <div className="absolute bottom-6 left-6 right-6">
+                <p className="text-xs font-mono text-red-500 uppercase tracking-widest">Okinawa Goju-Ryu</p>
+                <h3 className="text-lg font-bold text-white">Traditional Kata & Kumite</h3>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* AFFILIATIONS LOGO SECTION */}
+        <section className="bg-slate-950/60 border-y border-slate-900 py-8 relative overflow-hidden">
+          <div className="max-w-7xl mx-auto px-6">
+            <p className="text-center text-[10px] font-mono text-slate-500 uppercase tracking-widest mb-6">
+              Recognized & Affiliated Organizations
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-12 md:gap-16 opacity-60">
+              {dojoInfo?.affiliations.map((aff, idx) => (
+                <div
+                  key={idx}
+                  className="flex items-center gap-2 bg-slate-900/40 border border-slate-800 px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 shadow-sm"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                  {aff.name}
                 </div>
               ))}
             </div>
-          ) : destinations.length === 0 ? (
-            /* Empty State */
-            <div className="text-center py-20 rounded-2xl border-2 border-dashed border-slate-800 bg-slate-900/10">
-              <svg className="w-12 h-12 text-slate-600 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m8.25 3v6.75m0 0l-3-3m3 3l3-3M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
-              </svg>
-              <h3 className="text-lg font-bold text-slate-300">No Expeditions Available</h3>
-              <p className="text-slate-500 text-sm mt-1">Be the first to add a high-altitude target!</p>
-              <button
-                onClick={() => setShowAddForm(true)}
-                className="mt-4 px-4 py-2 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-indigo-400 hover:text-indigo-300 border border-slate-700 transition"
+          </div>
+        </section>
+
+        {/* PATH TO OLYMPIC GAMES (PROGRAMS) */}
+        <section id="about" className="max-w-7xl mx-auto px-6 py-20">
+          <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
+            <h2 className="text-xs font-mono text-red-500 uppercase tracking-widest">Training Methodology</h2>
+            <p className="text-3xl sm:text-4xl font-black text-white">Path to Olympic Games</p>
+            <p className="text-slate-400 text-sm">
+              We provide structured training programs designed to support our karatekas at every developmental stage.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Program 1 */}
+            <div className="group rounded-2xl bg-slate-900/30 border border-slate-900 hover:border-red-950 p-8 flex flex-col justify-between shadow-xl transition-all duration-300 hover:translate-y-[-4px] hover:bg-slate-900/60">
+              <div className="space-y-4">
+                <div className="w-12 h-12 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 group-hover:scale-110 transition-transform">
+                  {/* Belt icon */}
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-white group-hover:text-red-400 transition-colors">Belt Grading</h3>
+                <p className="text-slate-400 text-sm leading-relaxed">
+                  Every 3 months, formal grading exams are conducted under authorized examiners to evaluate student progress and upgrade their belt ranks (Kyu titles).
+                </p>
+              </div>
+              <button 
+                onClick={() => setShowBookingModal(true)} 
+                className="mt-6 text-xs font-semibold text-red-500 hover:text-red-400 flex items-center gap-1 group-hover:underline"
               >
-                Create Adventure
+                Inquire Grading Info &rarr;
               </button>
             </div>
-          ) : (
-            /* Data Grid */
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {destinations.map((dest, i) => (
-                <article
-                  key={dest._id || i}
-                  className="group rounded-2xl bg-slate-900/40 border border-slate-800/60 overflow-hidden flex flex-col justify-between shadow-xl transition-all duration-300 hover:translate-y-[-4px] hover:border-slate-750 hover:bg-slate-900/80"
+
+            {/* Program 2 */}
+            <div className="group rounded-2xl bg-slate-900/30 border border-slate-900 hover:border-red-950 p-8 flex flex-col justify-between shadow-xl transition-all duration-300 hover:translate-y-[-4px] hover:bg-slate-900/60">
+              <div className="space-y-4">
+                <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 group-hover:scale-110 transition-transform">
+                  {/* Swords icon */}
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-white group-hover:text-amber-400 transition-colors">Tournaments</h3>
+                <p className="text-slate-400 text-sm leading-relaxed">
+                  Students are trained in sport karate tactics (WKF rules) and sponsored to compete in District, Inter-State, National, and International tournaments.
+                </p>
+              </div>
+              <button 
+                onClick={() => setShowBookingModal(true)} 
+                className="mt-6 text-xs font-semibold text-amber-500 hover:text-amber-400 flex items-center gap-1 group-hover:underline"
+              >
+                View Tournament Schedule &rarr;
+              </button>
+            </div>
+
+            {/* Program 3 */}
+            <div className="group rounded-2xl bg-slate-900/30 border border-slate-900 hover:border-red-950 p-8 flex flex-col justify-between shadow-xl transition-all duration-300 hover:translate-y-[-4px] hover:bg-slate-900/60">
+              <div className="space-y-4">
+                <div className="w-12 h-12 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 group-hover:scale-110 transition-transform">
+                  {/* Training icon */}
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-white group-hover:text-red-400 transition-colors">Class Training</h3>
+                <p className="text-slate-400 text-sm leading-relaxed">
+                  Our regular weekly classes focus on fitness, mental focus, basic techniques (Kihon), pre-arranged routines (Kata), and sparring applications (Bunkai).
+                </p>
+              </div>
+              <button 
+                onClick={() => setShowBookingModal(true)} 
+                className="mt-6 text-xs font-semibold text-red-500 hover:text-red-400 flex items-center gap-1 group-hover:underline"
+              >
+                Check Weekly Timings &rarr;
+              </button>
+            </div>
+          </div>
+        </section>
+
+        {/* INTERACTIVE BELT RANKING SHOWCASE */}
+        <section id="belts" className="max-w-7xl mx-auto px-6 py-20 border-t border-slate-900">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            <div className="lg:col-span-5 space-y-6">
+              <h2 className="text-xs font-mono text-red-500 uppercase tracking-widest">Kyu & Dan Progression</h2>
+              <h3 className="text-3xl sm:text-4xl font-black text-white leading-tight">Interactive Belt Syllabus</h3>
+              <p className="text-slate-400 text-sm leading-relaxed">
+                {"In Goju-Ryu Karate, belts represent a student's technical growth, mental maturity, and duration of training. Click on any belt color to see the requirements and meaning of that level."}
+              </p>
+
+              {/* Belt Selector Bar */}
+              <div className="flex flex-wrap gap-2.5">
+                {Object.keys(beltData).map((colorKey) => {
+                  const isActive = activeBelt === colorKey;
+                  return (
+                    <button
+                      key={colorKey}
+                      onClick={() => setActiveBelt(colorKey)}
+                      className={`px-3 py-2 rounded-lg text-xs font-bold uppercase transition-all border ${
+                        isActive 
+                          ? "bg-red-600 border-red-500 text-white scale-[1.05]" 
+                          : "bg-slate-900 border-slate-800 text-slate-400 hover:text-white"
+                      }`}
+                    >
+                      {colorKey}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="lg:col-span-7 bg-slate-900/30 border border-slate-900 rounded-3xl p-6 sm:p-10 relative overflow-hidden">
+              <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-red-500/5 blur-[80px]" />
+              
+              {/* Displaying active belt card details */}
+              <div className="space-y-6 relative z-10 animate-in fade-in duration-300">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <span className="text-xs font-mono text-slate-500 uppercase tracking-wider">RANK LEVEL</span>
+                    <h4 className="text-2xl font-black text-white">{beltData[activeBelt].title}</h4>
+                  </div>
+                  <span className="px-3 py-1 rounded-md text-xs font-mono bg-slate-800 border border-slate-700 text-red-400">
+                    {beltData[activeBelt].kyu}
+                  </span>
+                </div>
+
+                {/* Simulated Belt Strap Visual */}
+                <div className="h-10 w-full rounded-md flex items-center justify-between overflow-hidden shadow-inner border border-slate-900 relative">
+                  <div className={`absolute inset-y-0 left-0 w-[80%] ${beltData[activeBelt].color}`} />
+                  <div className="absolute inset-y-0 right-0 w-[20%] bg-slate-950 flex items-center justify-center text-[10px] font-bold text-amber-500 border-l border-slate-850">
+                    {activeBelt === "black" ? "1st Dan" : "KYU"}
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <span className="text-xs font-mono text-slate-500 uppercase tracking-wider block">SYLLABUS FOCUS</span>
+                  <p className="text-slate-300 text-sm leading-relaxed">
+                    {beltData[activeBelt].desc}
+                  </p>
+                </div>
+
+                <div className="pt-4 border-t border-slate-850 flex items-center justify-between">
+                  <span className="text-xs text-slate-500">Minimum Training Period:</span>
+                  <span className="text-xs font-mono text-white font-bold">
+                    {activeBelt === "white" ? "None (Entry)" : activeBelt === "black" ? "3-4 Years" : "3-6 Months"}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* FINEST COACHES SECTION */}
+        <section id="instructors" className="max-w-7xl mx-auto px-6 py-20 border-t border-slate-900">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+            <div className="space-y-3">
+              <h2 className="text-xs font-mono text-red-500 uppercase tracking-widest font-bold">Elite Instructors</h2>
+              <p className="text-3xl sm:text-4xl font-black text-white">Finest Coaches of India</p>
+              <p className="text-slate-400 text-sm max-w-xl">
+                Our Senseis are affiliated with the Goju-Ryu Karate-Do Sports Federation and carry decades of combined martial arts experience.
+              </p>
+            </div>
+
+            {/* City Filters */}
+            <div className="flex flex-wrap gap-2">
+              {cities.map((city) => (
+                <button
+                  key={city}
+                  onClick={() => setSelectedCity(city)}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${
+                    selectedCity === city
+                      ? "bg-red-600/10 border-red-500 text-red-400"
+                      : "bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200"
+                  }`}
                 >
-                  <div className="relative h-48 w-full overflow-hidden">
+                  {city}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {loading ? (
+            /* Skeleton Loading State */
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[1, 2, 3].map((n) => (
+                <div key={n} className="rounded-3xl bg-slate-900/30 border border-slate-900 h-[380px] animate-pulse flex flex-col justify-between p-6">
+                  <div className="w-full h-48 rounded-2xl bg-slate-800" />
+                  <div className="space-y-3 mt-4 flex-1">
+                    <div className="h-6 w-2/3 bg-slate-800 rounded-md" />
+                    <div className="h-4 w-full bg-slate-800 rounded-md" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : filteredInstructors.length === 0 ? (
+            <div className="text-center py-20 rounded-2xl border-2 border-dashed border-slate-800 bg-slate-900/10">
+              <p className="text-slate-500 text-sm">No instructors found for {selectedCity}. You can add them in the admin dashboard.</p>
+            </div>
+          ) : (
+            /* Instructors Grid */
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {filteredInstructors.map((inst) => (
+                <article
+                  key={inst._id}
+                  className="group rounded-3xl bg-slate-900/30 border border-slate-900 hover:border-red-950 overflow-hidden flex flex-col justify-between shadow-xl transition-all duration-300 hover:translate-y-[-4px] hover:bg-slate-900/60"
+                >
+                  <div className="relative h-64 w-full overflow-hidden">
                     <img
-                      src={dest.image_url}
-                      alt={dest.title}
-                      className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
+                      src={inst.image_url}
+                      alt={inst.name}
+                      className="object-cover w-full h-full object-center group-hover:scale-105 transition-transform duration-500"
+                      onError={(e) => {
+                        // Fallback image
+                        e.currentTarget.src = "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=300&auto=format&fit=crop";
+                      }}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-80" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-85" />
                     
-                    {/* Altitude Tag */}
-                    <span className="absolute top-4 right-4 px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold bg-slate-950/80 border border-slate-800 text-indigo-300 backdrop-blur-md">
-                      {dest.altitude}
+                    {/* Belt Tag */}
+                    <span className="absolute top-4 right-4 px-3 py-1 rounded-lg text-[10px] font-mono font-bold bg-slate-950/80 border border-slate-800 text-amber-400 backdrop-blur-md">
+                      {inst.rank}
                     </span>
                   </div>
 
-                  <div className="p-6 flex-1 flex flex-col justify-between">
-                    <div>
-                      <h3 className="text-lg font-bold text-white group-hover:text-indigo-300 transition-colors mb-2">
-                        {dest.title}
+                  <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
+                    <div className="space-y-1">
+                      <span className="text-[10px] font-mono text-red-500 uppercase tracking-widest block">
+                        {inst.role}
+                      </span>
+                      <h3 className="text-xl font-bold text-white group-hover:text-red-400 transition-colors">
+                        {inst.name}
                       </h3>
-                      <p className="text-slate-400 text-sm leading-relaxed mb-4">
-                        {dest.description}
+                      <p className="text-xs text-slate-500 font-medium">
+                        Location: {inst.location}
                       </p>
                     </div>
 
-                    <div className="flex items-center justify-between pt-4 border-t border-slate-850">
-                      <span className="text-xs text-slate-500 font-mono">DIFFICULTY</span>
-                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                        dest.difficulty === "Easy" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" :
-                        dest.difficulty === "Medium" ? "bg-amber-500/10 text-amber-400 border border-amber-500/20" :
-                        dest.difficulty === "Hard" ? "bg-orange-500/10 text-orange-400 border border-orange-500/20" :
-                        "bg-rose-500/10 text-rose-400 border border-rose-500/20"
-                      }`}>
-                        {dest.difficulty}
-                      </span>
+                    <div className="pt-4 border-t border-slate-900 flex items-center justify-between">
+                      <span className="text-xs text-slate-400 font-mono">{inst.phone}</span>
+                      <a
+                        href={`tel:${inst.phone}`}
+                        className="px-3 py-1.5 rounded-lg text-[10px] font-bold bg-slate-800 hover:bg-red-600 hover:text-white text-slate-300 transition-colors"
+                      >
+                        Contact Coach
+                      </a>
                     </div>
                   </div>
                 </article>
@@ -383,14 +634,380 @@ export default function Home() {
             </div>
           )}
         </section>
+
+        {/* LATEST NEWS & EVENTS SECTION */}
+        <section id="news" className="max-w-7xl mx-auto px-6 py-20 border-t border-slate-900">
+          <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
+            <h2 className="text-xs font-mono text-red-500 uppercase tracking-widest font-bold">Dojo Activities</h2>
+            <p className="text-3xl sm:text-4xl font-black text-white font-sans">News & Championships</p>
+            <p className="text-slate-400 text-sm">
+              Stay updated with the latest tournaments, belt grading results, and special seminars conducted by our academy.
+            </p>
+          </div>
+
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-pulse">
+              <div className="bg-slate-900/30 border border-slate-900 h-64 rounded-3xl" />
+              <div className="bg-slate-900/30 border border-slate-900 h-64 rounded-3xl" />
+            </div>
+          ) : news.length === 0 ? (
+            <div className="text-center py-20 rounded-2xl border-2 border-dashed border-slate-800 bg-slate-900/10">
+              <p className="text-slate-500 text-sm">No announcements available yet. You can add them in the admin panel.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {news.map((item) => (
+                <article
+                  key={item._id}
+                  className="group rounded-3xl bg-slate-900/20 border border-slate-900 overflow-hidden flex flex-col sm:flex-row hover:border-red-950 transition-all duration-300 shadow-lg hover:bg-slate-900/40"
+                >
+                  <div className="w-full sm:w-2/5 h-48 sm:h-auto overflow-hidden relative">
+                    <img
+                      src={item.image_url}
+                      alt={item.title}
+                      className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
+                      onError={(e) => {
+                        e.currentTarget.src = "https://images.unsplash.com/photo-1517649763962-0c623066013b?q=80&w=600&auto=format&fit=crop";
+                      }}
+                    />
+                  </div>
+                  <div className="p-6 w-full sm:w-3/5 flex flex-col justify-between space-y-4">
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-[10px] text-slate-500 font-mono">
+                        <span>{item.date}</span>
+                        <span className="text-red-400 font-bold uppercase">{item.organizer}</span>
+                      </div>
+                      <h3 className="text-lg font-bold text-white group-hover:text-red-400 transition-colors">
+                        {item.title}
+                      </h3>
+                      <p className="text-slate-400 text-xs leading-relaxed line-clamp-3">
+                        {item.description}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setShowBookingModal(true)}
+                      className="text-xs font-semibold text-red-500 hover:text-red-400 flex items-center gap-1 group-hover:underline self-start pt-2"
+                    >
+                      Inquire Details &rarr;
+                    </button>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* CONTACT & DOJO LOCATION MAP SECTION */}
+        <section id="contact" className="max-w-7xl mx-auto px-6 py-20 border-t border-slate-900">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+            
+            {/* Dojo Details & Map */}
+            <div className="lg:col-span-6 space-y-8">
+              <div className="space-y-3">
+                <h2 className="text-xs font-mono text-red-500 uppercase tracking-widest font-bold">Visit Our Dojo</h2>
+                <h3 className="text-3xl font-black text-white">Get in Touch</h3>
+                <p className="text-slate-400 text-sm">
+                  We are open 6 days a week for training. Stop by for a free session or message us for batch details.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="bg-slate-900/20 border border-slate-900 p-5 rounded-2xl space-y-1">
+                  <span className="text-[10px] font-mono text-slate-500 uppercase">Phone Contact</span>
+                  <p className="text-sm font-bold text-white">{dojoInfo?.phone || "+91 85100 00838"}</p>
+                </div>
+                <div className="bg-slate-900/20 border border-slate-900 p-5 rounded-2xl space-y-1">
+                  <span className="text-[10px] font-mono text-slate-500 uppercase">Email Enquiries</span>
+                  <p className="text-sm font-bold text-white">{dojoInfo?.email || "contact@internationalkarate.in"}</p>
+                </div>
+                <div className="bg-slate-900/20 border border-slate-900 p-5 rounded-2xl sm:col-span-2 space-y-1">
+                  <span className="text-[10px] font-mono text-slate-500 uppercase">Dojo Address</span>
+                  <p className="text-sm font-semibold text-slate-300">
+                    {dojoInfo?.address || "X-1/32, Daal Mill Road, Budh Vihar, Phase-1, New Delhi-110086, India"}
+                  </p>
+                </div>
+              </div>
+
+              {/* Google Map iframe */}
+              <div className="h-64 w-full rounded-2xl overflow-hidden border border-slate-900 shadow-lg">
+                <iframe
+                  title="Dojo Location Map"
+                  src={dojoInfo?.map_embed || "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3498.4239857905183!2d77.098485!3d28.736785!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390d068593a201c1%3A0xe54fb7a28e932ec3!2sBudh%20Vihar%20Phase%20I%2C%20Budh%20Vihar%2C%20Delhi%2C%20110086!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin"}
+                  className="w-full h-full border-0"
+                  allowFullScreen
+                  loading="lazy"
+                />
+              </div>
+            </div>
+
+            {/* Trial Class Enrollment Box */}
+            <div className="lg:col-span-6 bg-slate-900/30 border border-slate-900 rounded-3xl p-8 relative flex flex-col justify-between shadow-xl">
+              <div className="absolute top-[-10%] left-[-10%] w-[35%] h-[35%] rounded-full bg-red-500/5 blur-[80px]" />
+              
+              <div className="space-y-6 relative z-10">
+                <div className="space-y-2">
+                  <h4 className="text-2xl font-black text-white">Enroll in a Free Trial</h4>
+                  <p className="text-slate-400 text-xs leading-relaxed">
+                    First class is completely free. Fill this quick application form, and our coach will contact you within 24 hours to schedule your session.
+                  </p>
+                </div>
+
+                <form onSubmit={handleBookingSubmit} className="space-y-4">
+                  <div>
+                    <label className="block text-[10px] font-mono text-slate-500 uppercase mb-1.5">{"Student's Full Name"}</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g., Rohan Kumar"
+                      value={studentName}
+                      onChange={(e) => setStudentName(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-850 focus:border-red-500 focus:ring-1 focus:ring-red-500 text-slate-200 placeholder-slate-600 outline-none text-sm transition"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[10px] font-mono text-slate-500 uppercase mb-1.5">{"Student's Age (Minimum 4)"}</label>
+                      <input
+                        type="number"
+                        required
+                        placeholder="e.g., 8"
+                        min="4"
+                        value={studentAge}
+                        onChange={(e) => setStudentAge(e.target.value)}
+                        className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-850 focus:border-red-500 focus:ring-1 focus:ring-red-500 text-slate-200 placeholder-slate-600 outline-none text-sm transition"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-mono text-slate-500 uppercase mb-1.5">Contact Number</label>
+                      <input
+                        type="tel"
+                        required
+                        placeholder="e.g., +91 99999 88888"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-850 focus:border-red-500 focus:ring-1 focus:ring-red-500 text-slate-200 placeholder-slate-600 outline-none text-sm transition"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[10px] font-mono text-slate-500 uppercase mb-1.5">Preferred Program</label>
+                      <select
+                        value={program}
+                        onChange={(e) => setProgram(e.target.value)}
+                        className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-850 focus:border-red-500 text-slate-200 outline-none text-sm transition"
+                      >
+                        <option value="Regular Training">Regular Training (Weekly)</option>
+                        <option value="Belt Grading">Belt Grading (Syllabus)</option>
+                        <option value="Tournament Training">Tournament Training (Elite)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-mono text-slate-500 uppercase mb-1.5">Preferred Date</label>
+                      <input
+                        type="date"
+                        required
+                        value={bookingDate}
+                        onChange={(e) => setBookingDate(e.target.value)}
+                        className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-850 focus:border-red-500 text-slate-200 outline-none text-sm transition"
+                      />
+                    </div>
+                  </div>
+
+                  {bookingError && (
+                    <p className="text-xs text-red-500 font-mono bg-red-950/20 border border-red-900/30 p-2.5 rounded-lg">
+                      {bookingError}
+                    </p>
+                  )}
+
+                  {bookingSuccess && (
+                    <p className="text-xs text-emerald-400 font-mono bg-emerald-950/20 border border-emerald-900/30 p-2.5 rounded-lg flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+                      Class Booked successfully! Coach will call you shortly.
+                    </p>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={bookingSubmitting || bookingSuccess}
+                    className="w-full py-3 rounded-xl font-bold bg-gradient-to-r from-red-600 to-amber-500 hover:from-red-700 hover:to-amber-600 text-white shadow-lg disabled:opacity-50 flex items-center justify-center gap-2 transition"
+                  >
+                    {bookingSubmitting && (
+                      <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      </svg>
+                    )}
+                    {bookingSubmitting ? "Submitting..." : bookingSuccess ? "Request Submitted!" : "Submit Free Trial Application"}
+                  </button>
+                </form>
+              </div>
+            </div>
+
+          </div>
+        </section>
       </main>
 
+      {/* POPUP MODAL FOR HEADER TRIAL BUTTON */}
+      {showBookingModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 animate-in fade-in duration-300">
+          <div className="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative">
+            <button
+              onClick={() => {
+                setShowBookingModal(false);
+                setBookingError(null);
+              }}
+              className="absolute top-4 right-4 text-slate-500 hover:text-slate-300 transition-colors"
+            >
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            <div className="space-y-4">
+              <div className="space-y-1">
+                <h4 className="text-xl font-black text-white">Join A Free Trial Session</h4>
+                <p className="text-slate-400 text-xs leading-relaxed">
+                  First class is on us. Experience the training under senior Senseis.
+                </p>
+              </div>
+
+              <form onSubmit={handleBookingSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-[10px] font-mono text-slate-500 uppercase mb-1">{"Student's Full Name"}</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g., Aarav Sharma"
+                    value={studentName}
+                    onChange={(e) => setStudentName(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-850 focus:border-red-500 text-slate-200 placeholder-slate-600 outline-none text-sm transition"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[10px] font-mono text-slate-500 uppercase mb-1">{"Student's Age"}</label>
+                    <input
+                      type="number"
+                      required
+                      placeholder="e.g., 7"
+                      min="4"
+                      value={studentAge}
+                      onChange={(e) => setStudentAge(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-850 focus:border-red-500 text-slate-200 placeholder-slate-600 outline-none text-sm transition"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-mono text-slate-500 uppercase mb-1">Contact Number</label>
+                    <input
+                      type="tel"
+                      required
+                      placeholder="e.g., +91 98765 43210"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-850 focus:border-red-500 text-slate-200 placeholder-slate-600 outline-none text-sm transition"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[10px] font-mono text-slate-500 uppercase mb-1">Program</label>
+                    <select
+                      value={program}
+                      onChange={(e) => setProgram(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-850 focus:border-red-500 text-slate-200 outline-none text-sm transition"
+                    >
+                      <option value="Regular Training">Regular Training</option>
+                      <option value="Belt Grading">Belt Grading</option>
+                      <option value="Tournament Training">Tournament Training</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-mono text-slate-500 uppercase mb-1">Preferred Date</label>
+                    <input
+                      type="date"
+                      required
+                      value={bookingDate}
+                      onChange={(e) => setBookingDate(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-850 focus:border-red-500 text-slate-200 outline-none text-sm transition"
+                    />
+                  </div>
+                </div>
+
+                {bookingError && (
+                  <p className="text-xs text-red-500 font-mono bg-red-950/20 border border-red-900/30 p-2.5 rounded-lg">
+                    {bookingError}
+                  </p>
+                )}
+
+                {bookingSuccess && (
+                  <p className="text-xs text-emerald-400 font-mono bg-emerald-950/20 border border-emerald-900/30 p-2.5 rounded-lg flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+                    Trial requested successfully! Sensei will call you soon.
+                  </p>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={bookingSubmitting || bookingSuccess}
+                  className="w-full py-3 rounded-xl font-bold bg-gradient-to-r from-red-600 to-amber-500 hover:from-red-700 hover:to-amber-600 text-white shadow-lg disabled:opacity-50 flex items-center justify-center gap-2 transition"
+                >
+                  {bookingSubmitting && (
+                    <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                  )}
+                  {bookingSubmitting ? "Scheduling..." : bookingSuccess ? "Booked!" : "Schedule My Free Trial Class"}
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Footer */}
-      <footer className="mt-auto border-t border-slate-900 bg-slate-950 py-8 text-center text-xs text-slate-500 font-mono">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p>© {new Date().getFullYear()} SKYBOUND Portal. Stack: Next.js + Flask + MongoDB + Nginx.</p>
+      <footer className="mt-auto border-t border-slate-905 bg-slate-950 py-12 text-slate-500 text-xs font-sans">
+        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-12 gap-8 mb-8">
+          <div className="md:col-span-5 space-y-4">
+            <h4 className="text-sm font-bold text-white uppercase tracking-wider">
+              {dojoInfo?.name || "Okinawa Goju Ryu Karate Do"}
+            </h4>
+            <p className="text-slate-400 text-xs leading-relaxed max-w-md">
+              We provide authentic martial arts and self-defense training to students aged 4+ across India. Build speed, strength, and focus under GKSF affiliated Senseis.
+            </p>
+          </div>
+
+          <div className="md:col-span-3 space-y-3">
+            <h4 className="text-xs font-mono text-slate-400 uppercase tracking-widest">Quick Links</h4>
+            <ul className="space-y-2 text-slate-400">
+              <li><a href="#home" className="hover:text-red-400 transition-colors">Home</a></li>
+              <li><a href="#about" className="hover:text-red-400 transition-colors">Path to Olympic Games</a></li>
+              <li><a href="#belts" className="hover:text-red-400 transition-colors">Belt Syllabus</a></li>
+              <li><a href="#instructors" className="hover:text-red-400 transition-colors">Senseis & Coaches</a></li>
+            </ul>
+          </div>
+
+          <div className="md:col-span-4 space-y-3">
+            <h4 className="text-xs font-mono text-slate-400 uppercase tracking-widest">Office Hours</h4>
+            <ul className="space-y-2 text-slate-400">
+              <li>Monday - Friday: 5:00 PM - 8:30 PM</li>
+              <li>Saturday: 8:00 AM - 11:30 AM</li>
+              <li>Sunday: Weekly Off / Special Seminars</li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-6 pt-6 border-t border-slate-900 flex flex-col sm:flex-row items-center justify-between gap-4 text-[10px] font-mono">
+          <p>© {new Date().getFullYear()} {dojoInfo?.name || "Okinawa Goju Ryu"}. All Rights Reserved.</p>
           <div className="flex items-center gap-6">
-            <span className="text-indigo-400">Dockerized Environment Ready</span>
+            <span className="text-red-500/80">Affiliated with GKSF & KIO</span>
+            <span className="text-slate-700">|</span>
+            <a href="/admin" className="hover:text-slate-300">Admin Login</a>
           </div>
         </div>
       </footer>
