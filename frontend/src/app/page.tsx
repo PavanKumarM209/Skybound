@@ -33,36 +33,12 @@ interface Trustee {
   image_url: string;
 }
 
-interface NewsItem {
-  _id?: string;
-  title: string;
-  organizer: string;
-  date: string;
-  description: string;
-  image_url: string;
-}
-
 export default function Home() {
   const [dojoInfo, setDojoInfo] = useState<DojoInfo | null>(null);
   const [instructors, setInstructors] = useState<Instructor[]>([]);
-  const [supportingInstructors, setSupportingInstructors] = useState<Instructor[]>([]);
   const [trustees, setTrustees] = useState<Trustee[]>([]);
-  const [news, setNews] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCity, setSelectedCity] = useState("All");
-
-
-
-  // Booking Modal States
-  const [showBookingModal, setShowBookingModal] = useState(false);
-  const [studentName, setStudentName] = useState("");
-  const [studentAge, setStudentAge] = useState("");
-  const [phone, setPhone] = useState("");
-  const [program, setProgram] = useState("Regular Training");
-  const [bookingDate, setBookingDate] = useState("");
-  const [bookingSubmitting, setBookingSubmitting] = useState(false);
-  const [bookingSuccess, setBookingSuccess] = useState(false);
-  const [bookingError, setBookingError] = useState<string | null>(null);
 
   // Selected Belt Info State
   const [activeBelt, setActiveBelt] = useState("white");
@@ -130,12 +106,10 @@ export default function Home() {
     async function loadData() {
       try {
         setLoading(true);
-        const [infoRes, instRes, newsRes, trusteeRes, supportingRes] = await Promise.all([
+        const [infoRes, instRes, trusteeRes] = await Promise.all([
           fetch("/api/dojo-info").catch(() => null),
           fetch("/api/instructors").catch(() => null),
-          fetch("/api/news").catch(() => null),
-          fetch("/api/trustees").catch(() => null),
-          fetch("/api/supporting-instructors").catch(() => null)
+          fetch("/api/trustees").catch(() => null)
         ]);
 
         if (infoRes && infoRes.ok) {
@@ -187,69 +161,6 @@ export default function Home() {
             }
           ]);
         }
-
-        if (supportingRes && supportingRes.ok) {
-          const supportingData = await supportingRes.json();
-          setSupportingInstructors(supportingData);
-        } else {
-          setSupportingInstructors([
-            {
-              _id: "supp_1",
-              name: "Sempai Pallavi",
-              rank: "Black Belt 1st Dan",
-              role: "Supporting Instructor",
-              location: "Bangalore, Karnataka",
-              phone: "+91 99999 11111",
-              email: "pallavi@example.com",
-              image_url: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=300&auto=format&fit=crop"
-            },
-            {
-              _id: "supp_2",
-              name: "Sempai Yashaswini M",
-              rank: "Black Belt 1st Dan",
-              role: "Supporting Instructor",
-              location: "Bangalore, Karnataka",
-              phone: "+91 99999 22222",
-              email: "yashaswini@example.com",
-              image_url: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=300&auto=format&fit=crop"
-            },
-            {
-              _id: "supp_3",
-              name: "Sempai Shravya S Hegde",
-              rank: "Black Belt 1st Dan",
-              role: "Supporting Instructor",
-              location: "Bangalore, Karnataka",
-              phone: "+91 99999 33333",
-              email: "shravya@example.com",
-              image_url: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=300&auto=format&fit=crop"
-            },
-            {
-              _id: "supp_4",
-              name: "Sempai Trisha",
-              rank: "Black Belt 1st Dan",
-              role: "Supporting Instructor",
-              location: "Bangalore, Karnataka",
-              phone: "+91 99999 44444",
-              email: "trisha@example.com",
-              image_url: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?q=80&w=300&auto=format&fit=crop"
-            },
-            {
-              _id: "supp_5",
-              name: "Sempai Phanindra Achari V",
-              rank: "Black Belt 1st Dan",
-              role: "Supporting Instructor",
-              location: "Bangalore, Karnataka",
-              phone: "+91 99999 55555",
-              email: "phanindra@example.com",
-              image_url: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=300&auto=format&fit=crop"
-            }
-          ]);
-        }
-
-        if (newsRes && newsRes.ok) {
-          const newsData = await newsRes.json();
-          setNews(newsData);
-        }
       } catch (error) {
         console.error("Failed to fetch dojo data", error);
       } finally {
@@ -258,56 +169,6 @@ export default function Home() {
     }
     loadData();
   }, []);
-
-
-
-  const handleBookingSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setBookingError(null);
-
-    const age = parseInt(studentAge);
-    if (isNaN(age) || age < 4) {
-      setBookingError("Karate classes are designed for ages 4 and above.");
-      return;
-    }
-
-    try {
-      setBookingSubmitting(true);
-      const res = await fetch("/api/bookings", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          student_name: studentName,
-          student_age: age,
-          phone: phone,
-          program: program,
-          date: bookingDate,
-        }),
-      });
-
-      if (!res.ok) {
-        throw new Error("Failed to submit booking request. Please check details.");
-      }
-
-      setBookingSuccess(true);
-      setTimeout(() => {
-        // Reset states
-        setStudentName("");
-        setStudentAge("");
-        setPhone("");
-        setBookingDate("");
-        setBookingSuccess(false);
-        setShowBookingModal(false);
-      }, 2500);
-    } catch (err: unknown) {
-      const errorMsg = err instanceof Error ? err.message : "Something went wrong.";
-      setBookingError(errorMsg);
-    } finally {
-      setBookingSubmitting(false);
-    }
-  };
 
   // Extract unique cities from instructors to display in filters
   const cities = ["All", ...Array.from(new Set(instructors.map((inst) => {
@@ -361,14 +222,6 @@ export default function Home() {
           </nav>
 
           <div className="flex items-center gap-4">
-
-
-            <button
-              onClick={() => setShowBookingModal(true)}
-              className="px-5 py-2.5 rounded-full text-xs font-bold bg-gradient-to-r from-red-600 to-amber-500 hover:from-red-700 hover:to-amber-600 text-white shadow-lg shadow-red-950/10 dark:shadow-red-950/50 hover:scale-[1.03] transition-all duration-200 active:scale-95 z-10 cursor-pointer"
-            >
-              Free Trial Class
-            </button>
           </div>
         </div>
       </header>
@@ -390,15 +243,9 @@ export default function Home() {
               Discover self-defense, build bulletproof self-discipline, and walk the path towards local, national, and Olympic karate championships. Learn from highly experienced Senseis.
             </p>
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-2">
-              <button
-                onClick={() => setShowBookingModal(true)}
-                className="px-8 py-3.5 rounded-xl font-bold bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-950/20 dark:shadow-red-950/40 transition-all duration-200 active:scale-95 cursor-pointer"
-              >
-                Book Free Trial
-              </button>
               <a
                 href="#contact"
-                className="px-8 py-3.5 rounded-xl font-bold bg-card border border-border hover:bg-slate-50 dark:hover:bg-slate-900 text-foreground transition-all duration-200"
+                className="px-8 py-3.5 rounded-xl font-bold bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-950/20 dark:shadow-red-950/40 transition-all duration-200 active:scale-95 cursor-pointer"
               >
                 Contact Dojo
               </a>
@@ -494,12 +341,12 @@ export default function Home() {
                   Every 3 months, formal grading exams are conducted under authorized examiners to evaluate student progress and upgrade their belt ranks (Kyu titles).
                 </p>
               </div>
-              <button 
-                onClick={() => setShowBookingModal(true)} 
+              <a 
+                href="#contact" 
                 className="mt-6 text-xs font-semibold text-red-500 hover:text-red-600 dark:hover:text-red-400 flex items-center gap-1 group-hover:underline cursor-pointer"
               >
                 Inquire Grading Info &rarr;
-              </button>
+              </a>
             </div>
 
             {/* Program 2 */}
@@ -516,12 +363,12 @@ export default function Home() {
                   Students are trained in sport karate tactics (WKF rules) and sponsored to compete in District, Inter-State, National, and International tournaments.
                 </p>
               </div>
-              <button 
-                onClick={() => setShowBookingModal(true)} 
-                className="mt-6 text-xs font-semibold text-amber-550 hover:text-amber-600 dark:hover:text-amber-450 flex items-center gap-1 group-hover:underline cursor-pointer"
+              <a 
+                href="#contact" 
+                className="mt-6 text-xs font-semibold text-amber-555 hover:text-amber-600 dark:hover:text-amber-450 flex items-center gap-1 group-hover:underline cursor-pointer"
               >
                 View Tournament Schedule &rarr;
-              </button>
+              </a>
             </div>
 
             {/* Program 3 */}
@@ -538,12 +385,12 @@ export default function Home() {
                   Our regular weekly classes focus on fitness, mental focus, basic techniques (Kihon), pre-arranged routines (Kata), and sparring applications (Bunkai).
                 </p>
               </div>
-              <button 
-                onClick={() => setShowBookingModal(true)} 
+              <a 
+                href="#contact" 
                 className="mt-6 text-xs font-semibold text-red-500 hover:text-red-600 dark:hover:text-red-400 flex items-center gap-1 group-hover:underline cursor-pointer"
               >
                 Check Weekly Timings &rarr;
-              </button>
+              </a>
             </div>
           </div>
         </section>
@@ -792,116 +639,14 @@ export default function Home() {
           )}
         </section>
 
-        {/* SUPPORTING INSTRUCTORS SECTION */}
-        {supportingInstructors.length > 0 && (
-          <section id="supporting" className="max-w-7xl mx-auto px-6 py-20 border-t border-border">
-            <div className="text-center max-w-2xl mx-auto mb-12 space-y-3">
-              <h2 className="text-xs font-mono text-red-500 uppercase tracking-widest font-bold">Supporting Team</h2>
-              <p className="text-3xl sm:text-4xl font-black text-foreground">Supporting Instructors</p>
-              <p className="text-muted text-sm">
-                Our dedicated assistant coaches and trainers helping students master their karate basics.
-              </p>
-            </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 justify-center">
-              {supportingInstructors.map((inst) => (
-                <article
-                  key={inst._id}
-                  className="group rounded-2xl bg-card border border-border hover:border-card-hover-border p-4 flex flex-col items-center text-center shadow-lg transition-all duration-300 hover:translate-y-[-2px]"
-                >
-                  <div className="relative w-24 h-24 rounded-full overflow-hidden border border-border mb-3 bg-background">
-                    <img
-                      src={inst.image_url}
-                      alt={inst.name}
-                      className="object-cover w-full h-full object-center group-hover:scale-105 transition-transform duration-500"
-                      onError={(e) => {
-                        e.currentTarget.src = "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=200&auto=format&fit=crop";
-                      }}
-                    />
-                  </div>
-                  <h3 className="text-sm font-bold text-foreground group-hover:text-red-500 dark:group-hover:text-red-400 transition-colors line-clamp-1">
-                    {inst.name}
-                  </h3>
-                  <p className="text-[10px] font-mono text-muted uppercase tracking-wider mt-0.5">
-                    {inst.role}
-                  </p>
-                  <span className="mt-2 px-2 py-0.5 rounded bg-background border border-border text-[9px] font-mono text-amber-505">
-                    {inst.rank}
-                  </span>
-                </article>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* LATEST NEWS & EVENTS SECTION */}
-        <section id="news" className="max-w-7xl mx-auto px-6 py-20 border-t border-border">
-          <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
-            <h2 className="text-xs font-mono text-red-500 uppercase tracking-widest font-bold">Dojo Activities</h2>
-            <p className="text-3xl sm:text-4xl font-black text-foreground font-sans">News & Championships</p>
-            <p className="text-muted text-sm">
-              Stay updated with the latest tournaments, belt grading results, and special seminars conducted by our academy.
-            </p>
-          </div>
-
-          {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-pulse">
-              <div className="bg-card border border-border h-64 rounded-3xl" />
-              <div className="bg-card border border-border h-64 rounded-3xl" />
-            </div>
-          ) : news.length === 0 ? (
-            <div className="text-center py-20 rounded-2xl border-2 border-dashed border-border bg-card/10">
-              <p className="text-muted text-sm">No announcements available yet. You can add them in the admin panel.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {news.map((item) => (
-                <article
-                  key={item._id}
-                  className="group rounded-3xl bg-card border border-border overflow-hidden flex flex-col sm:flex-row hover:border-card-hover-border transition-all duration-300 shadow-lg"
-                >
-                  <div className="w-full sm:w-2/5 h-48 sm:h-auto overflow-hidden relative bg-background">
-                    <img
-                      src={item.image_url}
-                      alt={item.title}
-                      className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
-                      onError={(e) => {
-                        e.currentTarget.src = "https://images.unsplash.com/photo-1517649763962-0c623066013b?q=80&w=600&auto=format&fit=crop";
-                      }}
-                    />
-                  </div>
-                  <div className="p-6 w-full sm:w-3/5 flex flex-col justify-between space-y-4">
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between text-[10px] text-muted font-mono">
-                        <span>{item.date}</span>
-                        <span className="text-red-500 dark:text-red-400 font-bold uppercase">{item.organizer}</span>
-                      </div>
-                      <h3 className="text-lg font-bold text-foreground group-hover:text-red-500 dark:group-hover:text-red-400 transition-colors">
-                        {item.title}
-                      </h3>
-                      <p className="text-muted text-xs leading-relaxed line-clamp-3">
-                        {item.description}
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => setShowBookingModal(true)}
-                      className="text-xs font-semibold text-red-550 hover:text-red-650 dark:hover:text-red-400 flex items-center gap-1 group-hover:underline self-start pt-2 cursor-pointer"
-                    >
-                      Inquire Details &rarr;
-                    </button>
-                  </div>
-                </article>
-              ))}
-            </div>
-          )}
-        </section>
 
         {/* CONTACT & DOJO LOCATION MAP SECTION */}
         <section id="contact" className="max-w-7xl mx-auto px-6 py-20 border-t border-border">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             
-            {/* Dojo Details & Map */}
-            <div className="lg:col-span-6 space-y-8">
+            {/* Dojo Details */}
+            <div className="space-y-8">
               <div className="space-y-3">
                 <h2 className="text-xs font-mono text-red-500 uppercase tracking-widest font-bold">Visit Our Dojo</h2>
                 <h3 className="text-3xl font-black text-foreground">Get in Touch</h3>
@@ -926,248 +671,22 @@ export default function Home() {
                   </p>
                 </div>
               </div>
-
-              {/* Google Map iframe */}
-              <div className="h-64 w-full rounded-2xl overflow-hidden border border-border shadow-lg">
-                <iframe
-                  title="Dojo Location Map"
-                  src={dojoInfo?.map_embed || "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3498.4239857905183!2d77.098485!3d28.736785!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390d068593a201c1%3A0xe54fb7a28e932ec3!2sBudh%20Vihar%20Phase%20I%2C%20Budh%20Vihar%2C%20Delhi%2C%20110086!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin"}
-                  className="w-full h-full border-0"
-                  allowFullScreen
-                  loading="lazy"
-                />
-              </div>
             </div>
 
-            {/* Trial Class Enrollment Box */}
-            <div className="lg:col-span-6 bg-card border border-border rounded-3xl p-8 relative flex flex-col justify-between shadow-xl">
-              <div className="absolute top-[-10%] left-[-10%] w-[35%] h-[35%] rounded-full bg-red-500/5 blur-[80px]" />
-              
-              <div className="space-y-6 relative z-10">
-                <div className="space-y-2">
-                  <h4 className="text-2xl font-black text-foreground">Enroll in a Free Trial</h4>
-                  <p className="text-muted text-xs leading-relaxed">
-                    First class is completely free. Fill this quick application form, and our coach will contact you within 24 hours to schedule your session.
-                  </p>
-                </div>
-
-                <form onSubmit={handleBookingSubmit} className="space-y-4">
-                  <div>
-                    <label className="block text-[10px] font-mono text-muted uppercase mb-1.5">{"Student's Full Name"}</label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g., Rohan Kumar"
-                      value={studentName}
-                      onChange={(e) => setStudentName(e.target.value)}
-                      className="w-full px-4 py-2.5 rounded-xl bg-background border border-border focus:border-red-500 focus:ring-1 focus:ring-red-500 text-foreground placeholder-muted/50 outline-none text-sm transition"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-[10px] font-mono text-muted uppercase mb-1.5">{"Student's Age (Minimum 4)"}</label>
-                      <input
-                        type="number"
-                        required
-                        placeholder="e.g., 8"
-                        min="4"
-                        value={studentAge}
-                        onChange={(e) => setStudentAge(e.target.value)}
-                        className="w-full px-4 py-2.5 rounded-xl bg-background border border-border focus:border-red-500 focus:ring-1 focus:ring-red-500 text-foreground placeholder-muted/50 outline-none text-sm transition"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-mono text-muted uppercase mb-1.5">Contact Number</label>
-                      <input
-                        type="tel"
-                        required
-                        placeholder="e.g., +91 99999 88888"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        className="w-full px-4 py-2.5 rounded-xl bg-background border border-border focus:border-red-500 focus:ring-1 focus:ring-red-500 text-foreground placeholder-muted/50 outline-none text-sm transition"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-[10px] font-mono text-muted uppercase mb-1.5">Preferred Program</label>
-                      <select
-                        value={program}
-                        onChange={(e) => setProgram(e.target.value)}
-                        className="w-full px-4 py-2.5 rounded-xl bg-background border border-border focus:border-red-500 text-foreground outline-none text-sm transition"
-                      >
-                        <option value="Regular Training">Regular Training (Weekly)</option>
-                        <option value="Belt Grading">Belt Grading (Syllabus)</option>
-                        <option value="Tournament Training">Tournament Training (Elite)</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-mono text-muted uppercase mb-1.5">Preferred Date</label>
-                      <input
-                        type="date"
-                        required
-                        value={bookingDate}
-                        onChange={(e) => setBookingDate(e.target.value)}
-                        className="w-full px-4 py-2.5 rounded-xl bg-background border border-border focus:border-red-500 text-foreground outline-none text-sm transition"
-                      />
-                    </div>
-                  </div>
-
-                  {bookingError && (
-                    <p className="text-xs text-red-500 font-mono bg-red-950/20 border border-red-900/30 p-2.5 rounded-lg">
-                      {bookingError}
-                    </p>
-                  )}
-
-                  {bookingSuccess && (
-                    <p className="text-xs text-emerald-605 dark:text-emerald-400 font-mono bg-emerald-950/20 border border-emerald-900/30 p-2.5 rounded-lg flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-                      Class Booked successfully! Coach will call you shortly.
-                    </p>
-                  )}
-
-                  <button
-                    type="submit"
-                    disabled={bookingSubmitting || bookingSuccess}
-                    className="w-full py-3 rounded-xl font-bold bg-gradient-to-r from-red-600 to-amber-500 hover:from-red-700 hover:to-amber-600 text-white shadow-lg disabled:opacity-50 flex items-center justify-center gap-2 transition cursor-pointer"
-                  >
-                    {bookingSubmitting && (
-                      <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                      </svg>
-                    )}
-                    {bookingSubmitting ? "Submitting..." : bookingSuccess ? "Request Submitted!" : "Submit Free Trial Application"}
-                  </button>
-                </form>
-              </div>
+            {/* Google Map iframe */}
+            <div className="h-96 w-full rounded-2xl overflow-hidden border border-border shadow-lg">
+              <iframe
+                title="Dojo Location Map"
+                src={dojoInfo?.map_embed || "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3498.4239857905183!2d77.098485!3d28.736785!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390d068593a201c1%3A0xe54fb7a28e932ec3!2sBudh%20Vihar%20Phase%20I%2C%20Budh%20Vihar%2C%20Delhi%2C%20110086!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin"}
+                className="w-full h-full border-0"
+                allowFullScreen
+                loading="lazy"
+              />
             </div>
 
           </div>
         </section>
       </main>
-
-      {/* POPUP MODAL FOR HEADER TRIAL BUTTON */}
-      {showBookingModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 animate-in fade-in duration-300">
-          <div className="w-full max-w-lg bg-card border border-border rounded-3xl p-6 sm:p-8 shadow-2xl relative">
-            <button
-              onClick={() => {
-                setShowBookingModal(false);
-                setBookingError(null);
-              }}
-              className="absolute top-4 right-4 text-muted hover:text-foreground transition-colors cursor-pointer"
-            >
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-
-            <div className="space-y-4">
-              <div className="space-y-1">
-                <h4 className="text-xl font-black text-foreground">Join A Free Trial Session</h4>
-                <p className="text-muted text-xs leading-relaxed">
-                  First class is on us. Experience the training under senior Senseis.
-                </p>
-              </div>
-
-              <form onSubmit={handleBookingSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-[10px] font-mono text-muted uppercase mb-1">{"Student's Full Name"}</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g., Aarav Sharma"
-                    value={studentName}
-                    onChange={(e) => setStudentName(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl bg-background border border-border focus:border-red-500 text-foreground placeholder-muted/50 outline-none text-sm transition"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-[10px] font-mono text-muted uppercase mb-1">{"Student's Age"}</label>
-                    <input
-                      type="number"
-                      required
-                      placeholder="e.g., 7"
-                      min="4"
-                      value={studentAge}
-                      onChange={(e) => setStudentAge(e.target.value)}
-                      className="w-full px-4 py-2.5 rounded-xl bg-background border border-border focus:border-red-500 text-foreground placeholder-muted/50 outline-none text-sm transition"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] font-mono text-muted uppercase mb-1">Contact Number</label>
-                    <input
-                      type="tel"
-                      required
-                      placeholder="e.g., +91 98765 43210"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      className="w-full px-4 py-2.5 rounded-xl bg-background border border-border focus:border-red-500 text-foreground placeholder-muted/50 outline-none text-sm transition"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-[10px] font-mono text-muted uppercase mb-1">Program</label>
-                    <select
-                      value={program}
-                      onChange={(e) => setProgram(e.target.value)}
-                      className="w-full px-4 py-2.5 rounded-xl bg-background border border-border focus:border-red-500 text-foreground outline-none text-sm transition"
-                    >
-                      <option value="Regular Training">Regular Training</option>
-                      <option value="Belt Grading">Belt Grading</option>
-                      <option value="Tournament Training">Tournament Training</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-[10px] font-mono text-muted uppercase mb-1">Preferred Date</label>
-                    <input
-                      type="date"
-                      required
-                      value={bookingDate}
-                      onChange={(e) => setBookingDate(e.target.value)}
-                      className="w-full px-4 py-2.5 rounded-xl bg-background border border-border focus:border-red-500 text-foreground outline-none text-sm transition"
-                    />
-                  </div>
-                </div>
-
-                {bookingError && (
-                  <p className="text-xs text-red-500 font-mono bg-red-950/20 border border-red-900/30 p-2.5 rounded-lg">
-                    {bookingError}
-                  </p>
-                )}
-
-                {bookingSuccess && (
-                  <p className="text-xs text-emerald-605 dark:text-emerald-450 font-mono bg-emerald-950/20 border border-emerald-900/30 p-2.5 rounded-lg flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-                    Trial requested successfully! Sensei will call you soon.
-                  </p>
-                )}
-
-                <button
-                  type="submit"
-                  disabled={bookingSubmitting || bookingSuccess}
-                  className="w-full py-3 rounded-xl font-bold bg-gradient-to-r from-red-600 to-amber-500 hover:from-red-700 hover:to-amber-600 text-white shadow-lg disabled:opacity-50 flex items-center justify-center gap-2 transition cursor-pointer"
-                >
-                  {bookingSubmitting && (
-                    <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                    </svg>
-                  )}
-                  {bookingSubmitting ? "Scheduling..." : bookingSuccess ? "Booked!" : "Schedule My Free Trial Class"}
-                </button>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Footer */}
       <footer className="mt-auto border-t border-border bg-footer-bg py-12 text-muted text-xs font-sans transition-colors duration-300">
