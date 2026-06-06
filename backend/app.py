@@ -141,24 +141,6 @@ DEFAULT_DB = {
             "image_url": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=300&auto=format&fit=crop"
         }
     ],
-    "news": [
-        {
-            "_id": "news_1",
-            "title": "6th Royal Challenges Cup 2022",
-            "organizer": "TRADI",
-            "date": "2022-10-15",
-            "description": "Annual championship attracting teams from multiple states. Focus on Kumite and Kata categories.",
-            "image_url": "https://images.unsplash.com/photo-1517649763962-0c623066013b?q=80&w=600&auto=format&fit=crop"
-        },
-        {
-            "_id": "news_2",
-            "title": "KSKAI ALL INDIA KARATE CHAMPIONSHIP 2022",
-            "organizer": "KSKAI",
-            "date": "2022-12-05",
-            "description": "Elite tournament for brown and black belts to qualify for national selections.",
-            "image_url": "https://images.unsplash.com/photo-1555597673-b21d5c935865?q=80&w=600&auto=format&fit=crop"
-        }
-    ],
     "bookings": [
         {
             "_id": "book_1",
@@ -177,58 +159,6 @@ DEFAULT_DB = {
             "program": "Belt Grading",
             "date": "2026-06-12",
             "status": "Confirmed"
-        }
-    ],
-    "supporting_instructors": [
-        {
-            "_id": "supp_1",
-            "name": "Sempai Pallavi",
-            "rank": "Black Belt 1st Dan",
-            "role": "Supporting Instructor",
-            "location": "Bangalore, Karnataka",
-            "phone": "+91 99999 11111",
-            "email": "pallavi@example.com",
-            "image_url": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=300&auto=format&fit=crop"
-        },
-        {
-            "_id": "supp_2",
-            "name": "Sempai Yashaswini M",
-            "rank": "Black Belt 1st Dan",
-            "role": "Supporting Instructor",
-            "location": "Bangalore, Karnataka",
-            "phone": "+91 99999 22222",
-            "email": "yashaswini@example.com",
-            "image_url": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=300&auto=format&fit=crop"
-        },
-        {
-            "_id": "supp_3",
-            "name": "Sempai Shravya S Hegde",
-            "rank": "Black Belt 1st Dan",
-            "role": "Supporting Instructor",
-            "location": "Bangalore, Karnataka",
-            "phone": "+91 99999 33333",
-            "email": "shravya@example.com",
-            "image_url": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=300&auto=format&fit=crop"
-        },
-        {
-            "_id": "supp_4",
-            "name": "Sempai Trisha",
-            "rank": "Black Belt 1st Dan",
-            "role": "Supporting Instructor",
-            "location": "Bangalore, Karnataka",
-            "phone": "+91 99999 44444",
-            "email": "trisha@example.com",
-            "image_url": "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?q=80&w=300&auto=format&fit=crop"
-        },
-        {
-            "_id": "supp_5",
-            "name": "Sempai Phanindra Achari V",
-            "rank": "Black Belt 1st Dan",
-            "role": "Supporting Instructor",
-            "location": "Bangalore, Karnataka",
-            "phone": "+91 99999 55555",
-            "email": "phanindra@example.com",
-            "image_url": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=300&auto=format&fit=crop"
         }
     ]
 }
@@ -291,20 +221,10 @@ def init_mongodb():
             db["trustees"].insert_many(DEFAULT_DB["trustees"])
             logger.info("Seeded MongoDB trustees.")
             
-        # Seeding news
-        if db["news"].count_documents({}) == 0:
-            db["news"].insert_many(DEFAULT_DB["news"])
-            logger.info("Seeded MongoDB news.")
-            
         # Seeding bookings
         if db["bookings"].count_documents({}) == 0:
             db["bookings"].insert_many(DEFAULT_DB["bookings"])
             logger.info("Seeded MongoDB bookings.")
-            
-        # Seeding supporting_instructors
-        if db["supporting_instructors"].count_documents({}) == 0:
-            db["supporting_instructors"].insert_many(DEFAULT_DB["supporting_instructors"])
-            logger.info("Seeded MongoDB supporting_instructors.")
             
     except Exception as ex:
         logger.error(f"Error seeding MongoDB: {ex}")
@@ -343,77 +263,7 @@ def get_trustees():
     data = load_json_db()
     return jsonify(data.get("trustees", [])), 200
 
-# ----------------- SUPPORTING INSTRUCTORS ENDPOINTS -----------------
-@app.route("/api/supporting-instructors", methods=["GET"])
-def get_supporting_instructors():
-    if db_connected and db is not None:
-        try:
-            supporting = []
-            for doc in db["supporting_instructors"].find():
-                doc["_id"] = str(doc["_id"])
-                supporting.append(doc)
-            return jsonify(supporting), 200
-        except Exception as e:
-            logger.error(f"Mongo fetch supporting error: {e}")
 
-    # JSON Fallback
-    data = load_json_db()
-    return jsonify(data.get("supporting_instructors", [])), 200
-
-
-@app.route("/api/supporting-instructors", methods=["POST"])
-def add_supporting_instructor():
-    req_data = request.json or {}
-    if not req_data.get("name") or not req_data.get("rank"):
-        return jsonify({"error": "Name and rank are required"}), 400
-
-    new_instructor = {
-        "name": req_data["name"],
-        "rank": req_data["rank"],
-        "role": req_data.get("role", "Supporting Instructor"),
-        "location": req_data.get("location", ""),
-        "phone": req_data.get("phone", ""),
-        "email": req_data.get("email", ""),
-        "image_url": req_data.get("image_url", "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=300&auto=format&fit=crop")
-    }
-
-    if db_connected and db is not None:
-        try:
-            result = db["supporting_instructors"].insert_one(new_instructor)
-            new_instructor["_id"] = str(result.inserted_id)
-            return jsonify(new_instructor), 201
-        except Exception as e:
-            logger.error(f"Mongo add supporting instructor error: {e}")
-
-    # JSON Fallback
-    db_data = load_json_db()
-    if "supporting_instructors" not in db_data:
-        db_data["supporting_instructors"] = []
-    new_instructor["_id"] = f"supp_{str(int(len(db_data['supporting_instructors']) + 10))}"
-    db_data["supporting_instructors"].append(new_instructor)
-    save_json_db(db_data)
-    return jsonify(new_instructor), 201
-
-@app.route("/api/supporting-instructors/<id>", methods=["DELETE"])
-def delete_supporting_instructor(id):
-    if db_connected and db is not None:
-        try:
-            result = db["supporting_instructors"].delete_one({"_id": ObjectId(id)})
-            if result.deleted_count > 0:
-                return jsonify({"success": True}), 200
-        except Exception as e:
-            logger.error(f"Mongo delete supporting instructor error: {e}")
-
-    # JSON Fallback
-    db_data = load_json_db()
-    if "supporting_instructors" not in db_data:
-        db_data["supporting_instructors"] = []
-    original_len = len(db_data["supporting_instructors"])
-    db_data["supporting_instructors"] = [i for i in db_data["supporting_instructors"] if i.get("_id") != id]
-    if len(db_data["supporting_instructors"]) < original_len:
-        save_json_db(db_data)
-        return jsonify({"success": True}), 200
-    return jsonify({"error": "Supporting instructor not found"}), 404
 
 # ----------------- DOJO INFO ENDPOINTS -----------------
 @app.route("/api/dojo-info", methods=["GET"])
@@ -532,71 +382,7 @@ def delete_instructor(id):
         return jsonify({"success": True}), 200
     return jsonify({"error": "Instructor not found"}), 404
 
-# ----------------- NEWS ENDPOINTS -----------------
-@app.route("/api/news", methods=["GET"])
-def get_news():
-    if db_connected and db is not None:
-        try:
-            news = []
-            for doc in db["news"].find().sort("date", -1):
-                doc["_id"] = str(doc["_id"])
-                news.append(doc)
-            return jsonify(news), 200
-        except Exception as e:
-            logger.error(f"Mongo fetch news error: {e}")
 
-    # JSON Fallback
-    db_data = load_json_db()
-    sorted_news = sorted(db_data["news"], key=lambda k: k.get("date", ""), reverse=True)
-    return jsonify(sorted_news), 200
-
-@app.route("/api/news", methods=["POST"])
-def add_news():
-    req_data = request.json or {}
-    if not req_data.get("title") or not req_data.get("description"):
-        return jsonify({"error": "Title and description are required"}), 400
-
-    new_item = {
-        "title": req_data["title"],
-        "description": req_data["description"],
-        "organizer": req_data.get("organizer", "Dojo"),
-        "date": req_data.get("date", "2026-06-03"),
-        "image_url": req_data.get("image_url", "https://images.unsplash.com/photo-1517649763962-0c623066013b?q=80&w=600&auto=format&fit=crop")
-    }
-
-    if db_connected and db is not None:
-        try:
-            result = db["news"].insert_one(new_item)
-            new_item["_id"] = str(result.inserted_id)
-            return jsonify(new_item), 201
-        except Exception as e:
-            logger.error(f"Mongo add news error: {e}")
-
-    # JSON Fallback
-    db_data = load_json_db()
-    new_item["_id"] = f"news_{str(int(len(db_data['news']) + 10))}"
-    db_data["news"].append(new_item)
-    save_json_db(db_data)
-    return jsonify(new_item), 201
-
-@app.route("/api/news/<id>", methods=["DELETE"])
-def delete_news(id):
-    if db_connected and db is not None:
-        try:
-            result = db["news"].delete_one({"_id": ObjectId(id)})
-            if result.deleted_count > 0:
-                return jsonify({"success": True}), 200
-        except Exception as e:
-            logger.error(f"Mongo delete news error: {e}")
-
-    # JSON Fallback
-    db_data = load_json_db()
-    original_len = len(db_data["news"])
-    db_data["news"] = [item for item in db_data["news"] if item.get("_id") != id]
-    if len(db_data["news"]) < original_len:
-        save_json_db(db_data)
-        return jsonify({"success": True}), 200
-    return jsonify({"error": "News not found"}), 404
 
 # ----------------- BOOKINGS ENDPOINTS -----------------
 @app.route("/api/bookings", methods=["GET"])
