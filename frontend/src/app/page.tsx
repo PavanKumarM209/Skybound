@@ -361,8 +361,9 @@ export default function Home() {
           </nav>
 
           <div className="flex items-center gap-4">
-
-
+            <a href="/admin" className="text-sm font-semibold text-muted hover:text-red-600 transition-colors">
+              Login
+            </a>
             <button
               onClick={() => setShowBookingModal(true)}
               className="px-5 py-2.5 rounded-full text-xs font-bold bg-gradient-to-r from-red-600 to-amber-500 hover:from-red-700 hover:to-amber-600 text-white shadow-lg shadow-red-950/10 dark:shadow-red-950/50 hover:scale-[1.03] transition-all duration-200 active:scale-95 z-10 cursor-pointer"
