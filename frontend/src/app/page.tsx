@@ -361,7 +361,7 @@ export default function Home() {
           </nav>
 
           <div className="flex items-center gap-4">
-            <a href="/admin" className="text-sm font-semibold text-muted hover:text-red-600 transition-colors">
+            <a href="/login" className="text-sm font-semibold text-muted hover:text-red-600 transition-colors">
               Login
             </a>
             <button

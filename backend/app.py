@@ -1,10 +1,18 @@
 import os
 import json
 import logging
+import jwt as pyjwt
+from datetime import datetime, timedelta, timezone
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from pymongo import MongoClient
 from bson.objectid import ObjectId
+from werkzeug.security import generate_password_hash, check_password_hash
+from dotenv import load_dotenv
+import certifi
+
+# Load environment variables
+load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -16,6 +24,8 @@ CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 # MongoDB Connection settings
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/skybound")
+JWT_SECRET = os.getenv("JWT_SECRET", "skybound-super-secret-key-change-in-production")
+JWT_EXPIRY_HOURS = 24
 logger.info(f"Connecting to MongoDB at {MONGO_URI}")
 
 db_connected = False
@@ -233,39 +243,22 @@ DEFAULT_DB = {
     ]
 }
 
-def load_json_db():
-    if not os.path.exists(JSON_DB_PATH):
-        try:
-            with open(JSON_DB_PATH, "w") as f:
-                json.dump(DEFAULT_DB, f, indent=4)
-            return DEFAULT_DB
-        except Exception as e:
-            logger.error(f"Failed to create json db file: {e}")
-            return DEFAULT_DB
-    try:
-        with open(JSON_DB_PATH, "r") as f:
-            return json.load(f)
-    except Exception as e:
-        logger.error(f"Failed to read json db: {e}")
-        return DEFAULT_DB
 
-def save_json_db(data):
-    try:
-        with open(JSON_DB_PATH, "w") as f:
-            json.dump(data, f, indent=4)
-    except Exception as e:
-        logger.error(f"Failed to save json db: {e}")
-
-# Attempt MongoDB connection
+# MongoDB connection attempt
 try:
-    client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=2000)
-    db = client.get_default_database("skybound")
+    client = MongoClient(
+        MONGO_URI, 
+        serverSelectionTimeoutMS=5000,
+        tlsAllowInvalidCertificates=True
+    )
     # Ping
     client.server_info()
+    # Explicitly set the database
+    db = client["skybound"]
     db_connected = True
-    logger.info("Successfully connected to MongoDB.")
+    logger.info("Successfully connected to MongoDB Atlas.")
 except Exception as e:
-    logger.error(f"MongoDB not available, using local JSON fallback: {e}")
+    logger.critical(f"FATAL: MongoDB not available. Enforcing MongoDB only mode: {e}")
     db_connected = False
     client = None
     db = None
@@ -305,6 +298,12 @@ def init_mongodb():
         if db["supporting_instructors"].count_documents({}) == 0:
             db["supporting_instructors"].insert_many(DEFAULT_DB["supporting_instructors"])
             logger.info("Seeded MongoDB supporting_instructors.")
+
+        # Ensure Users collection exists and has unique index on username
+        if "users" not in db.list_collection_names():
+            db.create_collection("users")
+            db["users"].create_index("username", unique=True)
+            logger.info("Created users collection with unique index on username.")
             
     except Exception as ex:
         logger.error(f"Error seeding MongoDB: {ex}")
@@ -313,8 +312,7 @@ def init_mongodb():
 if db_connected:
     init_mongodb()
 else:
-    # Ensure JSON DB exists locally
-    load_json_db()
+    logger.error("Skipping MongoDB initialization due to connection failure.")
 
 @app.route("/api/health", methods=["GET"])
 def health_check():
@@ -338,10 +336,7 @@ def get_trustees():
             return jsonify(trustees), 200
         except Exception as e:
             logger.error(f"Mongo fetch trustees error: {e}")
-
-    # JSON Fallback
-    data = load_json_db()
-    return jsonify(data.get("trustees", [])), 200
+    return jsonify({"error": "Database error or disconnected"}), 500
 
 # ----------------- SUPPORTING INSTRUCTORS ENDPOINTS -----------------
 @app.route("/api/supporting-instructors", methods=["GET"])
@@ -355,10 +350,7 @@ def get_supporting_instructors():
             return jsonify(supporting), 200
         except Exception as e:
             logger.error(f"Mongo fetch supporting error: {e}")
-
-    # JSON Fallback
-    data = load_json_db()
-    return jsonify(data.get("supporting_instructors", [])), 200
+    return jsonify({"error": "Database error or disconnected"}), 500
 
 
 @app.route("/api/supporting-instructors", methods=["POST"])
@@ -374,25 +366,36 @@ def add_supporting_instructor():
         "location": req_data.get("location", ""),
         "phone": req_data.get("phone", ""),
         "email": req_data.get("email", ""),
-        "image_url": req_data.get("image_url", "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=300&auto=format&fit=crop")
+        "image_url": req_data.get("image_url", "")
     }
 
     if db_connected and db is not None:
         try:
+            from werkzeug.security import generate_password_hash
+            from datetime import datetime, timezone
+
+            # Create user account if email provided
+            inst_email = new_instructor.get("email")
+            if inst_email:
+                user_exists = db["users"].find_one({"email": inst_email})
+                if not user_exists:
+                    new_user = {
+                        "username": inst_email.split('@')[0],
+                        "email": inst_email,
+                        "role": "instructor",
+                        "password_hashed": generate_password_hash("password123"),
+                        "force_password_change": True,
+                        "created_at": datetime.now(timezone.utc).isoformat()
+                    }
+                    db["users"].insert_one(new_user)
+
             result = db["supporting_instructors"].insert_one(new_instructor)
             new_instructor["_id"] = str(result.inserted_id)
             return jsonify(new_instructor), 201
         except Exception as e:
             logger.error(f"Mongo add supporting instructor error: {e}")
 
-    # JSON Fallback
-    db_data = load_json_db()
-    if "supporting_instructors" not in db_data:
-        db_data["supporting_instructors"] = []
-    new_instructor["_id"] = f"supp_{str(int(len(db_data['supporting_instructors']) + 10))}"
-    db_data["supporting_instructors"].append(new_instructor)
-    save_json_db(db_data)
-    return jsonify(new_instructor), 201
+    return jsonify({"error": "Database error or disconnected"}), 500
 
 @app.route("/api/supporting-instructors/<id>", methods=["DELETE"])
 def delete_supporting_instructor(id):
@@ -404,16 +407,7 @@ def delete_supporting_instructor(id):
         except Exception as e:
             logger.error(f"Mongo delete supporting instructor error: {e}")
 
-    # JSON Fallback
-    db_data = load_json_db()
-    if "supporting_instructors" not in db_data:
-        db_data["supporting_instructors"] = []
-    original_len = len(db_data["supporting_instructors"])
-    db_data["supporting_instructors"] = [i for i in db_data["supporting_instructors"] if i.get("_id") != id]
-    if len(db_data["supporting_instructors"]) < original_len:
-        save_json_db(db_data)
-        return jsonify({"success": True}), 200
-    return jsonify({"error": "Supporting instructor not found"}), 404
+    return jsonify({"error": "Supporting instructor not found or database disconnected"}), 404
 
 # ----------------- DOJO INFO ENDPOINTS -----------------
 @app.route("/api/dojo-info", methods=["GET"])
@@ -427,9 +421,7 @@ def get_dojo_info():
         except Exception as e:
             logger.error(f"Mongo fetch error: {e}")
             
-    # JSON Fallback
-    data = load_json_db()
-    return jsonify(data["dojo_info"]), 200
+    return jsonify({"error": "Dojo info not found or database disconnected"}), 404
 
 @app.route("/api/dojo-info", methods=["POST"])
 def update_dojo_info():
@@ -459,11 +451,7 @@ def update_dojo_info():
         except Exception as e:
             logger.error(f"Mongo update settings error: {e}")
 
-    # JSON Fallback
-    db_data = load_json_db()
-    db_data["dojo_info"].update(update_data)
-    save_json_db(db_data)
-    return jsonify(db_data["dojo_info"]), 200
+    return jsonify({"error": "Database error or disconnected"}), 500
 
 # ----------------- INSTRUCTORS ENDPOINTS -----------------
 @app.route("/api/instructors", methods=["GET"])
@@ -478,9 +466,7 @@ def get_instructors():
         except Exception as e:
             logger.error(f"Mongo fetch instructors error: {e}")
 
-    # JSON Fallback
-    db_data = load_json_db()
-    return jsonify(db_data["instructors"]), 200
+    return jsonify({"error": "Database error or disconnected"}), 500
 
 @app.route("/api/instructors", methods=["POST"])
 def add_instructor():
@@ -495,23 +481,36 @@ def add_instructor():
         "location": req_data.get("location", ""),
         "phone": req_data.get("phone", ""),
         "email": req_data.get("email", ""),
-        "image_url": req_data.get("image_url", "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=300&auto=format&fit=crop")
+        "image_url": req_data.get("image_url", "")
     }
 
     if db_connected and db is not None:
         try:
+            from werkzeug.security import generate_password_hash
+            from datetime import datetime, timezone
+            
+            # Create a user account if an email is provided
+            inst_email = new_instructor.get("email")
+            if inst_email:
+                user_exists = db["users"].find_one({"email": inst_email})
+                if not user_exists:
+                    new_user = {
+                        "username": inst_email.split('@')[0],
+                        "email": inst_email,
+                        "role": "instructor",
+                        "password_hashed": generate_password_hash("password123"),
+                        "force_password_change": True,
+                        "created_at": datetime.now(timezone.utc).isoformat()
+                    }
+                    db["users"].insert_one(new_user)
+
             result = db["instructors"].insert_one(new_instructor)
             new_instructor["_id"] = str(result.inserted_id)
             return jsonify(new_instructor), 201
         except Exception as e:
             logger.error(f"Mongo add instructor error: {e}")
 
-    # JSON Fallback
-    db_data = load_json_db()
-    new_instructor["_id"] = f"inst_{str(int(len(db_data['instructors']) + 10))}"
-    db_data["instructors"].append(new_instructor)
-    save_json_db(db_data)
-    return jsonify(new_instructor), 201
+    return jsonify({"error": "Database error or disconnected"}), 500
 
 @app.route("/api/instructors/<id>", methods=["DELETE"])
 def delete_instructor(id):
@@ -523,14 +522,7 @@ def delete_instructor(id):
         except Exception as e:
             logger.error(f"Mongo delete instructor error: {e}")
 
-    # JSON Fallback
-    db_data = load_json_db()
-    original_len = len(db_data["instructors"])
-    db_data["instructors"] = [i for i in db_data["instructors"] if i.get("_id") != id]
-    if len(db_data["instructors"]) < original_len:
-        save_json_db(db_data)
-        return jsonify({"success": True}), 200
-    return jsonify({"error": "Instructor not found"}), 404
+    return jsonify({"error": "Instructor not found or database disconnected"}), 404
 
 # ----------------- NEWS ENDPOINTS -----------------
 @app.route("/api/news", methods=["GET"])
@@ -545,10 +537,7 @@ def get_news():
         except Exception as e:
             logger.error(f"Mongo fetch news error: {e}")
 
-    # JSON Fallback
-    db_data = load_json_db()
-    sorted_news = sorted(db_data["news"], key=lambda k: k.get("date", ""), reverse=True)
-    return jsonify(sorted_news), 200
+    return jsonify({"error": "Database error or disconnected"}), 500
 
 @app.route("/api/news", methods=["POST"])
 def add_news():
@@ -572,12 +561,7 @@ def add_news():
         except Exception as e:
             logger.error(f"Mongo add news error: {e}")
 
-    # JSON Fallback
-    db_data = load_json_db()
-    new_item["_id"] = f"news_{str(int(len(db_data['news']) + 10))}"
-    db_data["news"].append(new_item)
-    save_json_db(db_data)
-    return jsonify(new_item), 201
+    return jsonify({"error": "Database error or disconnected"}), 500
 
 @app.route("/api/news/<id>", methods=["DELETE"])
 def delete_news(id):
@@ -588,15 +572,7 @@ def delete_news(id):
                 return jsonify({"success": True}), 200
         except Exception as e:
             logger.error(f"Mongo delete news error: {e}")
-
-    # JSON Fallback
-    db_data = load_json_db()
-    original_len = len(db_data["news"])
-    db_data["news"] = [item for item in db_data["news"] if item.get("_id") != id]
-    if len(db_data["news"]) < original_len:
-        save_json_db(db_data)
-        return jsonify({"success": True}), 200
-    return jsonify({"error": "News not found"}), 404
+    return jsonify({"error": "News not found or database disconnected"}), 404
 
 # ----------------- BOOKINGS ENDPOINTS -----------------
 @app.route("/api/bookings", methods=["GET"])
@@ -611,9 +587,7 @@ def get_bookings():
         except Exception as e:
             logger.error(f"Mongo fetch bookings error: {e}")
 
-    # JSON Fallback
-    db_data = load_json_db()
-    return jsonify(db_data["bookings"]), 200
+    return jsonify({"error": "Database error or disconnected"}), 500
 
 @app.route("/api/bookings", methods=["POST"])
 def add_booking():
@@ -638,12 +612,7 @@ def add_booking():
         except Exception as e:
             logger.error(f"Mongo add booking error: {e}")
 
-    # JSON Fallback
-    db_data = load_json_db()
-    new_booking["_id"] = f"book_{str(int(len(db_data['bookings']) + 10))}"
-    db_data["bookings"].append(new_booking)
-    save_json_db(db_data)
-    return jsonify(new_booking), 201
+    return jsonify({"error": "Database error or disconnected"}), 500
 
 @app.route("/api/bookings/<id>", methods=["PATCH"])
 def update_booking_status(id):
@@ -660,18 +629,237 @@ def update_booking_status(id):
         except Exception as e:
             logger.error(f"Mongo update booking error: {e}")
 
-    # JSON Fallback
-    db_data = load_json_db()
-    found = False
-    for b in db_data["bookings"]:
-        if b.get("_id") == id:
-            b["status"] = status
-            found = True
-            break
-    if found:
-        save_json_db(db_data)
-        return jsonify({"success": True, "status": status}), 200
-    return jsonify({"error": "Booking not found"}), 404
+    return jsonify({"error": "Booking not found or database disconnected"}), 404
+
+# ----------------- USERS ENDPOINTS -----------------
+@app.route("/api/users", methods=["GET"])
+def get_users():
+    if db_connected and db is not None:
+        try:
+            users = []
+            for doc in db["users"].find():
+                doc["_id"] = str(doc["_id"])
+                # Don't return hashed passwords in list
+                if "password_hashed" in doc:
+                    del doc["password_hashed"]
+                users.append(doc)
+            return jsonify(users), 200
+        except Exception as e:
+            logger.error(f"Mongo fetch users error: {e}")
+    
+    return jsonify({"error": "Database error or disconnected"}), 500
+
+@app.route("/api/users", methods=["POST"])
+def register_user():
+    req_data = request.json or {}
+    required_fields = ["username", "email", "role", "position", "phone_number", "photo_image_url", "password"]
+    
+    for field in required_fields:
+        if not req_data.get(field):
+            return jsonify({"error": f"Field '{field}' is required"}), 400
+
+    new_user = {
+        "username": req_data["username"],
+        "email": req_data["email"],
+        "role": req_data["role"],
+        "position": req_data["position"],
+        "phone_number": req_data["phone_number"],
+        "photo_image_url": req_data["photo_image_url"],
+        "password_hashed": generate_password_hash(req_data["password"]),
+        "created_at": datetime.utcnow().isoformat(),
+        "updated_at": datetime.utcnow().isoformat()
+    }
+
+    if db_connected and db is not None:
+        try:
+            # Check if user already exists
+            if db["users"].find_one({"username": req_data["username"]}):
+                return jsonify({"error": "Username already exists"}), 409
+            
+            result = db["users"].insert_one(new_user)
+            new_user["_id"] = str(result.inserted_id)
+            del new_user["password_hashed"]
+            return jsonify(new_user), 201
+        except Exception as e:
+            logger.error(f"Error registering user: {e}")
+            return jsonify({"error": str(e)}), 500
+
+    return jsonify({"error": "Database not connected"}), 500
+
+def token_required(f):
+    from functools import wraps
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth_header = request.headers.get("Authorization")
+        if not auth_header or not auth_header.startswith("Bearer "):
+            return jsonify({"error": "Authorization token is missing"}), 401
+        token = auth_header.split(" ", 1)[1]
+        try:
+            pyjwt.decode(token, JWT_SECRET, algorithms=["HS256"])
+        except pyjwt.ExpiredSignatureError:
+            return jsonify({"error": "Token has expired"}), 401
+        except pyjwt.InvalidTokenError:
+            return jsonify({"error": "Invalid token"}), 401
+        return f(*args, **kwargs)
+    return decorated
+
+@app.route("/api/verify-token", methods=["POST"])
+def verify_token():
+    """Verify a JWT token and return the decoded user payload."""
+    auth_header = request.headers.get("Authorization", "")
+    if not auth_header.startswith("Bearer "):
+        return jsonify({"error": "Missing or invalid Authorization header"}), 401
+
+    token = auth_header.split(" ", 1)[1]
+    try:
+        payload = pyjwt.decode(token, JWT_SECRET, algorithms=["HS256"])
+        # Remove JWT metadata fields
+        payload.pop("exp", None)
+        payload.pop("iat", None)
+        return jsonify({"valid": True, "user": payload}), 200
+    except pyjwt.ExpiredSignatureError:
+        return jsonify({"valid": False, "error": "Token has expired"}), 401
+    except pyjwt.InvalidTokenError as e:
+        return jsonify({"valid": False, "error": str(e)}), 401
+
+@app.route("/api/login", methods=["POST"])
+def login():
+    req_data = request.json or {}
+    username_or_email = req_data.get("username")
+    password = req_data.get("password")
+
+    if not username_or_email or not password:
+        return jsonify({"error": "Username and password are required"}), 400
+
+    if not db_connected or db is None:
+        return jsonify({"error": "Database not connected"}), 500
+
+    try:
+        # Check by username or email
+        user = db["users"].find_one({
+            "$or": [
+                {"username": username_or_email},
+                {"email": username_or_email}
+            ]
+        })
+
+        if not user:
+            return jsonify({"error": "Invalid credentials"}), 401
+        
+        if not check_password_hash(user["password_hashed"], password):
+            return jsonify({"error": "Invalid credentials"}), 401
+        
+        # Success — issue JWT
+        user_data = {
+            "id": str(user["_id"]),
+            "username": user["username"],
+            "email": user["email"],
+            "role": user["role"],
+            "position": user.get("position", ""),
+            "force_password_change": user.get("force_password_change", False)
+        }
+
+        payload = {
+            **user_data,
+            "exp": datetime.now(timezone.utc) + timedelta(hours=JWT_EXPIRY_HOURS),
+            "iat": datetime.now(timezone.utc),
+        }
+        token = pyjwt.encode(payload, JWT_SECRET, algorithm="HS256")
+
+        return jsonify({
+            "message": "Login successful",
+            "token": token,
+            "user": user_data
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Login error: {e}")
+        return jsonify({"error": "An internal error occurred"}), 500
+
+
+@app.route("/api/change-password", methods=["POST"])
+@token_required
+def change_password():
+    if not db_connected:
+        return jsonify({"error": "Database not connected"}), 500
+        
+    req_data = request.json or {}
+    new_password = req_data.get("new_password")
+    if not new_password or len(new_password) < 6:
+        return jsonify({"error": "Password must be at least 6 characters"}), 400
+        
+    # Get user id from token
+    auth_header = request.headers.get("Authorization", "")
+    token = auth_header.split(" ", 1)[1]
+    payload = pyjwt.decode(token, JWT_SECRET, algorithms=["HS256"])
+    user_id = payload.get("id")
+    
+    if not user_id:
+        return jsonify({"error": "Invalid user token"}), 400
+        
+    try:
+        db["users"].update_one(
+            {"_id": ObjectId(user_id)},
+            {
+                "$set": {
+                    "password_hashed": generate_password_hash(new_password),
+                    "force_password_change": False
+                }
+            }
+        )
+        return jsonify({"message": "Password updated successfully"}), 200
+    except Exception as e:
+        logger.error(f"Error updating password: {e}")
+        return jsonify({"error": "Failed to update password"}), 500
+
+
+@app.route("/api/update-account", methods=["POST"])
+@token_required
+def update_account():
+    if not db_connected:
+        return jsonify({"error": "Database not connected"}), 500
+
+    auth_header = request.headers.get("Authorization", "")
+    token = auth_header.split(" ", 1)[1]
+    payload = pyjwt.decode(token, JWT_SECRET, algorithms=["HS256"])
+    user_id = payload.get("id")
+    if not user_id:
+        return jsonify({"error": "Invalid user token"}), 400
+
+    req_data = request.json or {}
+    updates = {}
+
+    new_username = req_data.get("username", "").strip()
+    new_password = req_data.get("new_password", "").strip()
+    profile_photo = req_data.get("profile_photo", "").strip()
+
+    if new_username:
+        # Check username uniqueness
+        existing = db["users"].find_one({"username": new_username, "_id": {"$ne": ObjectId(user_id)}})
+        if existing:
+            return jsonify({"error": "Username already taken"}), 409
+        updates["username"] = new_username
+
+    if new_password:
+        if len(new_password) < 6:
+            return jsonify({"error": "Password must be at least 6 characters"}), 400
+        updates["password_hashed"] = generate_password_hash(new_password)
+
+    if profile_photo:
+        updates["profile_photo"] = profile_photo
+
+    if not updates:
+        return jsonify({"error": "No changes provided"}), 400
+
+    try:
+        db["users"].update_one({"_id": ObjectId(user_id)}, {"$set": updates})
+        user = db["users"].find_one({"_id": ObjectId(user_id)}, {"password_hashed": 0})
+        user["_id"] = str(user["_id"])
+        return jsonify({"message": "Account updated", "user": user}), 200
+    except Exception as e:
+        logger.error(f"Error updating account: {e}")
+        return jsonify({"error": "Failed to update account"}), 500
+
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 5000))
