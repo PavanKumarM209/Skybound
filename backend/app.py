@@ -10,6 +10,7 @@ from bson.objectid import ObjectId
 from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
 import certifi
+from twilio.rest import Client
 
 # Load environment variables
 load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
@@ -27,6 +28,14 @@ MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/skybound")
 JWT_SECRET = os.getenv("JWT_SECRET", "skybound-super-secret-key-change-in-production")
 JWT_EXPIRY_HOURS = 24
 logger.info(f"Connecting to MongoDB at {MONGO_URI}")
+
+# Twilio SMS Configuration
+TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID", "")
+TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN", "")
+TWILIO_PHONE_NUMBER = os.getenv("TWILIO_PHONE_NUMBER", "")
+twilio_client = None
+if TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN:
+    twilio_client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
 
 db_connected = False
 client = None
@@ -72,83 +81,53 @@ DEFAULT_DB = {
     "instructors": [
         {
             "_id": "inst_1",
-            "name": "Sensei Samarth S",
+            "name": "Sensei Rajesh Kumar",
             "rank": "Black Belt 3rd Dan",
-            "role": "Head Instructor",
-            "location": "Bangalore, Karnataka",
-            "phone": "+91 8510000838",
-            "email": "samarth@example.com",
-            "image_url": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=300&auto=format&fit=crop"
+            "role": "Head Coach",
+            "location": "New Delhi, Delhi",
+            "phone": "+91 98765 43210",
+            "email": "rajesh@skyboundkarate.in",
+            "image_url": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=400&auto=format&fit=crop"
         },
         {
             "_id": "inst_2",
-            "name": "Sensei Pavan Kumar M",
+            "name": "Sensei Priya Sharma",
             "rank": "Black Belt 2nd Dan",
-            "role": "Head Examiner",
-            "location": "Bangalore, Karnataka",
-            "phone": "+91 6362630742",
-            "email": "pavankumarm209@gmail.com",
-            "image_url": "C:\\Users\\Pavan kumar M\\OneDrive\\Pictures\\Camera Roll\\1VE22CS109_PAVAN_KUMAR_M.jpeg"
+            "role": "Kata Specialist",
+            "location": "Budh Vihar, Delhi",
+            "phone": "+91 98764 32109",
+            "email": "priya@skyboundkarate.in",
+            "image_url": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=400&auto=format&fit=crop"
         },
         {
             "_id": "inst_3",
-            "name": "Sensei Chandana U S",
+            "name": "Sensei Arjun Singh",
             "rank": "Black Belt 2nd Dan",
-            "role": "Disciplinary Head and Data Analyst",
-            "location": "Bangalore, Karnataka",
-            "phone": "+91 77777 66666",
-            "email": "chandana@example.com",
-            "image_url": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=300&auto=format&fit=crop"
+            "role": "Kumite Coach",
+            "location": "Rohini, Delhi",
+            "phone": "+91 98763 21098",
+            "email": "arjun@skyboundkarate.in",
+            "image_url": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=400&auto=format&fit=crop"
         },
         {
             "_id": "inst_4",
-            "name": "Sensei Nithyanandham P",
-            "rank": "Black Belt 2nd Dan",
-            "role": "Kata and Technical Head",
-            "location": "Bangalore, Karnataka",
-            "phone": "+91 9069118692",
-            "email": "nithyanandham@example.com",
-            "image_url": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=300&auto=format&fit=crop"
+            "name": "Sensei Deepika Patel",
+            "rank": "Black Belt 1st Dan",
+            "role": "Assistant Coach",
+            "location": "Pitampura, Delhi",
+            "phone": "+91 98762 10987",
+            "email": "deepika@skyboundkarate.in",
+            "image_url": "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?q=80&w=400&auto=format&fit=crop"
         },
         {
             "_id": "inst_5",
-            "name": "Sensei Ajay P K",
-            "rank": "Black Belt 2nd Dan",
-            "role": "Kubudo Head",
-            "location": "Bangalore, Karnataka",
-            "phone": "+91 33333 22222",
-            "email": "ajay@example.com",
-            "image_url": "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?q=80&w=300&auto=format&fit=crop"
-        },
-        {
-            "_id": "inst_6",
-            "name": "Sensei Sannidhi S",
-            "rank": "Black Belt 2nd Dan",
-            "role": "Kumite and Kickboxing Head",
-            "location": "Bangalore, Karnataka",
-            "phone": "+91 55555 44444",
-            "email": "sannidhi@example.com",
-            "image_url": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=300&auto=format&fit=crop"
-        },
-        {
-            "_id": "inst_7",
-            "name": "Sensei Deva Dharshini",
-            "rank": "Black Belt 2nd Dan",
-            "role": "Tournament Head",
-            "location": "Bangalore, Karnataka",
-            "phone": "+91 22222 11111",
-            "email": "devadharshini@example.com",
-            "image_url": "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?q=80&w=300&auto=format&fit=crop"
-        },
-        {
-            "_id": "inst_8",
-            "name": "Sensei Rishith M",
-            "rank": "Black Belt 2nd Dan",
-            "role": "Media Officer and Financial Advisor",
-            "location": "Bangalore, Karnataka",
-            "phone": "+91 66666 55555",
-            "email": "rishith@example.com",
-            "image_url": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=300&auto=format&fit=crop"
+            "name": "Sensei Amar Verma",
+            "rank": "Black Belt 1st Dan",
+            "role": "Training Instructor",
+            "location": "Dwarka, Delhi",
+            "phone": "+91 98761 09876",
+            "email": "amar@skyboundkarate.in",
+            "image_url": "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?q=80&w=400&auto=format&fit=crop"
         }
     ],
     "news": [
@@ -323,6 +302,64 @@ def health_check():
         "database": db_status,
         "service": "Flask API (Local Fallback Mode)" if not db_connected else "Flask API"
     }), 200
+
+# ----------------- LOGIN ENDPOINT -----------------
+@app.route("/api/login", methods=["POST"])
+def login():
+    req_data = request.json or {}
+    username = req_data.get("username")
+    password = req_data.get("password")
+
+    if not username or not password:
+        return jsonify({"error": "Username and password are required"}), 400
+
+    if db_connected and db is not None:
+        try:
+            admin = db["admins"].find_one({"username": username, "password": password})
+            if admin:
+                token = pyjwt.encode(
+                    {"username": username, "exp": datetime.now(timezone.utc) + timedelta(hours=JWT_EXPIRY_HOURS)},
+                    JWT_SECRET,
+                    algorithm="HS256"
+                )
+                return jsonify({
+                    "token": token,
+                    "user": {
+                        "username": username,
+                        "role": "admin",
+                        "force_password_change": False
+                    }
+                }), 200
+            else:
+                return jsonify({"error": "Invalid credentials"}), 401
+        except Exception as e:
+            logger.error(f"Mongo login error: {e}")
+
+    # JSON Fallback
+    try:
+        with open(JSON_DB_PATH, "r") as f:
+            db_data = json.load(f)
+    except:
+        return jsonify({"error": "Database error"}), 500
+
+    admins = db_data.get("admins", [])
+    for admin in admins:
+        if admin.get("username") == username and admin.get("password") == password:
+            token = pyjwt.encode(
+                {"username": username, "exp": datetime.now(timezone.utc) + timedelta(hours=JWT_EXPIRY_HOURS)},
+                JWT_SECRET,
+                algorithm="HS256"
+            )
+            return jsonify({
+                "token": token,
+                "user": {
+                    "username": username,
+                    "role": "admin",
+                    "force_password_change": False
+                }
+            }), 200
+
+    return jsonify({"error": "Invalid credentials"}), 401
 
 # ----------------- TRUSTEES ENDPOINTS -----------------
 @app.route("/api/trustees", methods=["GET"])
@@ -579,8 +616,13 @@ def delete_news(id):
 def get_bookings():
     if db_connected and db is not None:
         try:
+            instructor_id = request.args.get("instructor_id")
+            query = {}
+            if instructor_id:
+                query["instructor_id"] = instructor_id
+
             bookings = []
-            for doc in db["bookings"].find():
+            for doc in db["bookings"].find(query):
                 doc["_id"] = str(doc["_id"])
                 bookings.append(doc)
             return jsonify(bookings), 200
@@ -592,8 +634,8 @@ def get_bookings():
 @app.route("/api/bookings", methods=["POST"])
 def add_booking():
     req_data = request.json or {}
-    if not req_data.get("student_name") or not req_data.get("phone"):
-        return jsonify({"error": "Student name and phone number are required"}), 400
+    if not req_data.get("student_name") or not req_data.get("phone") or not req_data.get("instructor_id"):
+        return jsonify({"error": "Student name, phone number, and instructor ID are required"}), 400
 
     new_booking = {
         "student_name": req_data["student_name"],
@@ -601,7 +643,9 @@ def add_booking():
         "phone": req_data["phone"],
         "program": req_data.get("program", "Regular Training"),
         "date": req_data.get("date", ""),
-        "status": "Pending"
+        "instructor_id": req_data["instructor_id"],
+        "status": "pending",
+        "created_at": datetime.now(timezone.utc).isoformat()
     }
 
     if db_connected and db is not None:
@@ -618,18 +662,384 @@ def add_booking():
 def update_booking_status(id):
     req_data = request.json or {}
     status = req_data.get("status")
-    if not status or status not in ["Pending", "Confirmed", "Completed", "Archived"]:
+    if not status or status not in ["pending", "accepted", "rejected"]:
         return jsonify({"error": "Invalid status value"}), 400
 
     if db_connected and db is not None:
         try:
+            booking = db["bookings"].find_one({"_id": ObjectId(id)})
+            if not booking:
+                return jsonify({"error": "Booking not found"}), 404
+
             result = db["bookings"].update_one({"_id": ObjectId(id)}, {"$set": {"status": status}})
+
+            # Send SMS if booking is accepted
+            if status == "accepted" and twilio_client:
+                phone = booking.get("phone", "")
+                if phone:
+                    # Add +91 prefix if not present (for India)
+                    if not phone.startswith("+"):
+                        phone = "+91" + phone.lstrip("0")
+
+                    try:
+                        student_name = booking.get("student_name", "Student")
+                        twilio_client.messages.create(
+                            body=f"Hi {student_name}! Your trial class booking has been accepted! Our Sensei will contact you soon. Thank you for choosing Skybound Academy!",
+                            from_=TWILIO_PHONE_NUMBER,
+                            to=phone
+                        )
+                        logger.info(f"SMS sent successfully to {phone}")
+                    except Exception as sms_error:
+                        logger.warning(f"Failed to send SMS: {sms_error}")
+
             if result.modified_count > 0 or result.matched_count > 0:
                 return jsonify({"success": True, "status": status}), 200
         except Exception as e:
             logger.error(f"Mongo update booking error: {e}")
 
     return jsonify({"error": "Booking not found or database disconnected"}), 404
+
+# --------- STUDENTS ENDPOINTS --------
+
+@app.route("/api/students", methods=["POST"])
+def create_student():
+    req_data = request.json or {}
+    required_fields = ["name", "email", "father_name", "age", "gender", "class", "phone", "password", "instructor_id"]
+
+    if not all(field in req_data for field in required_fields):
+        return jsonify({"error": "Missing required fields"}), 400
+
+    if db_connected and db is not None:
+        try:
+            student_data = {
+                "name": req_data.get("name"),
+                "email": req_data.get("email"),
+                "father_name": req_data.get("father_name"),
+                "age": req_data.get("age"),
+                "gender": req_data.get("gender"),
+                "class": req_data.get("class"),
+                "phone": req_data.get("phone"),
+                "password": req_data.get("password"),
+                "instructor_id": req_data.get("instructor_id"),
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "attendance": 0,
+                "fees_paid": 0,
+                "status": "active"
+            }
+
+            result = db["students"].insert_one(student_data)
+            student_id = str(result.inserted_id)
+
+            return jsonify({
+                "success": True,
+                "student_id": student_id,
+                "message": "Student added successfully"
+            }), 201
+        except Exception as e:
+            logger.error(f"Error creating student: {e}")
+            return jsonify({"error": str(e)}), 500
+
+    return jsonify({"error": "Database error"}), 500
+
+@app.route("/api/students", methods=["GET"])
+def get_students():
+    instructor_id = request.args.get("instructor_id")
+
+    if db_connected and db is not None:
+        try:
+            if instructor_id:
+                students = list(db["students"].find({"instructor_id": instructor_id}))
+            else:
+                students = list(db["students"].find())
+
+            # Convert ObjectId to string
+            for student in students:
+                student["_id"] = str(student["_id"])
+
+            return jsonify(students), 200
+        except Exception as e:
+            logger.error(f"Error fetching students: {e}")
+            return jsonify({"error": str(e)}), 500
+
+    return jsonify({"error": "Database error"}), 500
+
+@app.route("/api/students/<student_id>", methods=["GET"])
+def get_student(student_id):
+    if db_connected and db is not None:
+        try:
+            student = db["students"].find_one({"_id": ObjectId(student_id)})
+            if not student:
+                return jsonify({"error": "Student not found"}), 404
+
+            student["_id"] = str(student["_id"])
+            return jsonify(student), 200
+        except Exception as e:
+            logger.error(f"Error fetching student: {e}")
+            return jsonify({"error": str(e)}), 500
+
+    return jsonify({"error": "Database error"}), 500
+
+# --------- ATTENDANCE ENDPOINTS --------
+
+@app.route("/api/attendance", methods=["POST"])
+def mark_attendance():
+    req_data = request.json or {}
+    instructor_id = req_data.get("instructor_id")
+    date = req_data.get("date")
+    student_ids = req_data.get("student_ids", [])
+
+    if not instructor_id or not date or not student_ids:
+        return jsonify({"error": "Missing required fields"}), 400
+
+    if db_connected and db is not None:
+        try:
+            # Create attendance record
+            attendance_record = {
+                "instructor_id": instructor_id,
+                "date": date,
+                "students": student_ids,
+                "created_at": datetime.now(timezone.utc).isoformat()
+            }
+
+            db["attendance"].insert_one(attendance_record)
+
+            # Update student attendance count
+            for student_id in student_ids:
+                db["students"].update_one(
+                    {"_id": ObjectId(student_id)},
+                    {"$inc": {"attendance": 1}}
+                )
+
+            return jsonify({
+                "success": True,
+                "message": f"Attendance marked for {len(student_ids)} students"
+            }), 201
+        except Exception as e:
+            logger.error(f"Error marking attendance: {e}")
+            return jsonify({"error": str(e)}), 500
+
+    return jsonify({"error": "Database error"}), 500
+
+@app.route("/api/attendance", methods=["GET"])
+def get_attendance():
+    student_id = request.args.get("student_id")
+    instructor_id = request.args.get("instructor_id")
+
+    if db_connected and db is not None:
+        try:
+            query = {}
+            if student_id:
+                query = {"students": student_id}
+            elif instructor_id:
+                query = {"instructor_id": instructor_id}
+
+            attendance = list(db["attendance"].find(query))
+
+            # Convert ObjectId to string
+            for record in attendance:
+                record["_id"] = str(record["_id"])
+
+            return jsonify(attendance), 200
+        except Exception as e:
+            logger.error(f"Error fetching attendance: {e}")
+            return jsonify({"error": str(e)}), 500
+
+    return jsonify({"error": "Database error"}), 500
+
+# --------- UNIFIED LOGIN ENDPOINTS --------
+
+# Instructor Login by Email (Unified)
+@app.route("/api/instructor-login-email", methods=["POST"])
+def instructor_login_email():
+    req_data = request.json or {}
+    email = req_data.get("email")
+    password = req_data.get("password")
+
+    if not email or not password:
+        return jsonify({"error": "Email and password required"}), 400
+
+    if db_connected and db is not None:
+        try:
+            # Find instructor by email
+            instructor = db["instructors"].find_one({"email": email})
+            if not instructor:
+                return jsonify({"error": "Invalid credentials"}), 401
+
+            # Check password
+            stored_password = instructor.get("password", os.getenv("INSTRUCTOR_DEFAULT_PASSWORD", email))
+            if password != stored_password:
+                return jsonify({"error": "Invalid credentials"}), 401
+
+            # Generate JWT token
+            instructor_id = str(instructor["_id"])
+            payload = {
+                "user_id": instructor_id,
+                "role": "instructor",
+                "exp": datetime.now(timezone.utc) + timedelta(hours=JWT_EXPIRY_HOURS),
+            }
+            token = pyjwt.encode(payload, JWT_SECRET, algorithm="HS256")
+            return jsonify({
+                "token": token,
+                "user_id": instructor_id,
+                "name": instructor.get("name", ""),
+                "role": "instructor"
+            }), 200
+        except Exception as e:
+            logger.error(f"Login error: {e}")
+            return jsonify({"error": "Login failed"}), 500
+
+    return jsonify({"error": "Database error"}), 500
+
+# Admin Login (Unified)
+@app.route("/api/admin-login", methods=["POST"])
+def admin_login():
+    req_data = request.json or {}
+    email = req_data.get("email")
+    password = req_data.get("password")
+
+    if not email or not password:
+        return jsonify({"error": "Email and password required"}), 400
+
+    if db_connected and db is not None:
+        try:
+            # Find admin user
+            admin = db["users"].find_one({"email": email, "role": "admin"})
+            if not admin:
+                return jsonify({"error": "Invalid credentials"}), 401
+
+            # Check password (in production, use proper hashing)
+            stored_password = admin.get("password", "admin123")
+            if password != stored_password:
+                return jsonify({"error": "Invalid credentials"}), 401
+
+            # Generate JWT token
+            user_id = str(admin["_id"])
+            payload = {
+                "user_id": user_id,
+                "role": "admin",
+                "exp": datetime.now(timezone.utc) + timedelta(hours=JWT_EXPIRY_HOURS),
+            }
+            token = pyjwt.encode(payload, JWT_SECRET, algorithm="HS256")
+            return jsonify({
+                "token": token,
+                "user_id": user_id,
+                "name": admin.get("name", ""),
+                "role": "admin"
+            }), 200
+        except Exception as e:
+            logger.error(f"Admin login error: {e}")
+            return jsonify({"error": "Login failed"}), 500
+
+    return jsonify({"error": "Database error"}), 500
+
+# Student Login
+@app.route("/api/student-login", methods=["POST"])
+def student_login():
+    req_data = request.json or {}
+    email = req_data.get("email")
+    password = req_data.get("password")
+
+    if not email or not password:
+        return jsonify({"error": "Email and password required"}), 400
+
+    if db_connected and db is not None:
+        try:
+            # Find student by email
+            student = db["students"].find_one({"email": email})
+            if not student:
+                return jsonify({"error": "Invalid credentials"}), 401
+
+            # Check password
+            stored_password = student.get("password", "")
+            if password != stored_password:
+                return jsonify({"error": "Invalid credentials"}), 401
+
+            # Generate JWT token
+            student_id = str(student["_id"])
+            payload = {
+                "user_id": student_id,
+                "role": "student",
+                "exp": datetime.now(timezone.utc) + timedelta(hours=JWT_EXPIRY_HOURS),
+            }
+            token = pyjwt.encode(payload, JWT_SECRET, algorithm="HS256")
+            return jsonify({
+                "token": token,
+                "user_id": student_id,
+                "name": student.get("name", ""),
+                "role": "student"
+            }), 200
+        except Exception as e:
+            logger.error(f"Student login error: {e}")
+            return jsonify({"error": "Login failed"}), 500
+
+    return jsonify({"error": "Database error"}), 500
+
+# Legacy Instructor Login (by ID - for backward compatibility)
+@app.route("/api/instructor-login", methods=["POST"])
+def instructor_login():
+    req_data = request.json or {}
+    instructor_id = req_data.get("instructor_id")
+    password = req_data.get("password")
+
+    if not instructor_id or not password:
+        return jsonify({"error": "Instructor ID and password required"}), 400
+
+    if db_connected and db is not None:
+        try:
+            instructor = db["instructors"].find_one({"_id": ObjectId(instructor_id)})
+            if not instructor:
+                return jsonify({"error": "Instructor not found"}), 404
+
+            correct_password = os.getenv("INSTRUCTOR_DEFAULT_PASSWORD", instructor_id)
+            if password == correct_password:
+                payload = {
+                    "instructor_id": instructor_id,
+                    "exp": datetime.now(timezone.utc) + timedelta(hours=JWT_EXPIRY_HOURS),
+                }
+                token = pyjwt.encode(payload, JWT_SECRET, algorithm="HS256")
+                return jsonify({"token": token, "instructor_id": instructor_id}), 200
+            else:
+                return jsonify({"error": "Invalid password"}), 401
+        except Exception as e:
+            logger.error(f"Login error: {e}")
+
+    return jsonify({"error": "Database error or disconnected"}), 500
+
+# --------- INSTRUCTOR CHANGE PASSWORD ENDPOINT --------
+@app.route("/api/instructor-change-password", methods=["POST"])
+def change_instructor_password():
+    req_data = request.json or {}
+    instructor_id = req_data.get("instructor_id")
+    old_password = req_data.get("old_password")
+    new_password = req_data.get("new_password")
+
+    if not all([instructor_id, old_password, new_password]):
+        return jsonify({"error": "All fields required"}), 400
+
+    if db_connected and db is not None:
+        try:
+            instructor = db["instructors"].find_one({"_id": ObjectId(instructor_id)})
+            if not instructor:
+                return jsonify({"error": "Instructor not found"}), 404
+
+            # Verify old password
+            correct_password = os.getenv("INSTRUCTOR_DEFAULT_PASSWORD", instructor_id)
+            stored_password = instructor.get("password", correct_password)
+
+            if old_password != stored_password:
+                return jsonify({"error": "Incorrect current password"}), 401
+
+            # Update with new password
+            db["instructors"].update_one(
+                {"_id": ObjectId(instructor_id)},
+                {"$set": {"password": new_password}}
+            )
+
+            return jsonify({"success": True, "message": "Password changed successfully"}), 200
+        except Exception as e:
+            logger.error(f"Change password error: {e}")
+
+    return jsonify({"error": "Database error or disconnected"}), 500
 
 # ----------------- USERS ENDPOINTS -----------------
 @app.route("/api/users", methods=["GET"])
@@ -722,60 +1132,81 @@ def verify_token():
     except pyjwt.InvalidTokenError as e:
         return jsonify({"valid": False, "error": str(e)}), 401
 
-@app.route("/api/login", methods=["POST"])
-def login():
+
+# ----------------- TRIAL REQUESTS ENDPOINTS -----------------
+@app.route("/api/trial-requests", methods=["POST"])
+def submit_trial_request():
     req_data = request.json or {}
-    username_or_email = req_data.get("username")
-    password = req_data.get("password")
 
-    if not username_or_email or not password:
-        return jsonify({"error": "Username and password are required"}), 400
+    required_fields = ["student_name", "student_age", "phone"]
+    if not all(req_data.get(field) for field in required_fields):
+        return jsonify({"error": "Missing required fields"}), 400
 
-    if not db_connected or db is None:
-        return jsonify({"error": "Database not connected"}), 500
+    trial_request = {
+        "student_name": req_data.get("student_name"),
+        "student_age": int(req_data.get("student_age")),
+        "phone": req_data.get("phone"),
+        "program": req_data.get("program", "Regular Training"),
+        "preferred_date": req_data.get("preferred_date", ""),
+        "status": "pending",
+        "created_at": datetime.now(timezone.utc),
+        "admin_notes": ""
+    }
 
-    try:
-        # Check by username or email
-        user = db["users"].find_one({
-            "$or": [
-                {"username": username_or_email},
-                {"email": username_or_email}
-            ]
-        })
+    if db_connected and db is not None:
+        try:
+            result = db["trial_requests"].insert_one(trial_request)
+            trial_request["_id"] = str(result.inserted_id)
+            return jsonify({"success": True, "message": "Trial request submitted successfully"}), 201
+        except Exception as e:
+            logger.error(f"Mongo trial request error: {e}")
+            return jsonify({"error": "Database error"}), 500
 
-        if not user:
-            return jsonify({"error": "Invalid credentials"}), 401
-        
-        if not check_password_hash(user["password_hashed"], password):
-            return jsonify({"error": "Invalid credentials"}), 401
-        
-        # Success — issue JWT
-        user_data = {
-            "id": str(user["_id"]),
-            "username": user["username"],
-            "email": user["email"],
-            "role": user["role"],
-            "position": user.get("position", ""),
-            "force_password_change": user.get("force_password_change", False)
-        }
+    return jsonify({"error": "Database not connected"}), 500
 
-        payload = {
-            **user_data,
-            "exp": datetime.now(timezone.utc) + timedelta(hours=JWT_EXPIRY_HOURS),
-            "iat": datetime.now(timezone.utc),
-        }
-        token = pyjwt.encode(payload, JWT_SECRET, algorithm="HS256")
+@app.route("/api/trial-requests", methods=["GET"])
+@token_required
+def get_trial_requests():
+    if db_connected and db is not None:
+        try:
+            requests = []
+            for doc in db["trial_requests"].find().sort("created_at", -1):
+                doc["_id"] = str(doc["_id"])
+                doc["created_at"] = doc["created_at"].isoformat() if hasattr(doc["created_at"], "isoformat") else str(doc["created_at"])
+                requests.append(doc)
+            return jsonify(requests), 200
+        except Exception as e:
+            logger.error(f"Mongo fetch trial requests error: {e}")
+            return jsonify({"error": "Database error"}), 500
 
-        return jsonify({
-            "message": "Login successful",
-            "token": token,
-            "user": user_data
-        }), 200
-        
-    except Exception as e:
-        logger.error(f"Login error: {e}")
-        return jsonify({"error": "An internal error occurred"}), 500
+    return jsonify({"error": "Database not connected"}), 500
 
+@app.route("/api/trial-requests/<id>", methods=["PATCH"])
+@token_required
+def update_trial_request(id):
+    req_data = request.json or {}
+    status = req_data.get("status")
+    admin_notes = req_data.get("admin_notes", "")
+
+    if status not in ["pending", "approved", "rejected"]:
+        return jsonify({"error": "Invalid status"}), 400
+
+    if db_connected and db is not None:
+        try:
+            from bson.objectid import ObjectId
+            result = db["trial_requests"].update_one(
+                {"_id": ObjectId(id)},
+                {"$set": {"status": status, "admin_notes": admin_notes}}
+            )
+            if result.modified_count > 0:
+                return jsonify({"success": True}), 200
+            else:
+                return jsonify({"error": "Request not found"}), 404
+        except Exception as e:
+            logger.error(f"Mongo update trial request error: {e}")
+            return jsonify({"error": "Database error"}), 500
+
+    return jsonify({"error": "Database not connected"}), 500
 
 @app.route("/api/change-password", methods=["POST"])
 @token_required

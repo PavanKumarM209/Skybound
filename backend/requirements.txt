@@ -7,3 +7,4 @@ certifi==2024.6.2
 dnspython==2.6.1
 PyJWT==2.8.0
 Werkzeug==3.0.3
+twilio==9.0.4
