@@ -42,6 +42,33 @@ interface NewsItem {
   image_url: string;
 }
 
+const AFFILIATIONS_DATA = [
+  {
+    name: "Karate India",
+    logo: "/logo_karate_india.png",
+  },
+  {
+    name: "Karnataka State Karate Association",
+    logo: "/logo_kska.png",
+  },
+  {
+    name: "WAKO India Kickboxing",
+    logo: "/logo_wako_india.png",
+  },
+  {
+    name: "Khelo India",
+    logo: "/logo_khelo_india.png",
+  },
+  {
+    name: "Shotokan Karate-Do International",
+    logo: "/logo_skif.png",
+  },
+  {
+    name: "Sports Authority of India (SAI)",
+    logo: "/logo_sai.png",
+  }
+];
+
 export default function Home() {
   const [dojoInfo, setDojoInfo] = useState<DojoInfo | null>(null);
   const [instructors, setInstructors] = useState<Instructor[]>([]);
@@ -94,7 +121,7 @@ export default function Home() {
       title: "Yellow Belt",
       kyu: "9th & 8th Kyu",
       desc: "Represents the first ray of sunlight. Focuses on developing body control, balance, and basic footwork combinations.",
-      color: "bg-amber-400 text-slate-950 border border-amber-500",
+      color: "bg-amber-400 text-slate-955 text-slate-950 border border-amber-500",
       border: "border-amber-500"
     },
     orange: {
@@ -129,7 +156,7 @@ export default function Home() {
       title: "Brown Belt",
       kyu: "2nd & 1st Kyu",
       desc: "Represents the ripening of a seed. Focus shifts to internal energy, breathing patterns (Sanchin), and tactical defense.",
-      color: "bg-amber-800 text-white border border-amber-950",
+      color: "bg-amber-800 text-white border border-amber-955 border-amber-950",
       border: "border-amber-955"
     },
     black: {
@@ -141,16 +168,70 @@ export default function Home() {
     }
   };
 
+  // Selected Weapon State
+  const [activeWeapon, setActiveWeapon] = useState("sai");
+
+  const weaponData: Record<string, { title: string; origin: string; focus: string; desc1: string; desc2: string; image: string }> = {
+    sai: {
+      title: "Sai (釵)",
+      origin: "Okinawa, Japan",
+      focus: "Dual-wield defense & trapping",
+      desc1: "A traditional Okinawan three-pronged metal weapon used for trapping, blocking, and parrying opponent strikes.",
+      desc2: "Taught in advanced classes to develop wrist flexibility, agility, and symmetric dual-wielding defensive skills.",
+      image: "/weapon_sai.png"
+    },
+    nunchaku: {
+      title: "Standard Nunchaku (ヌンチャク)",
+      origin: "Ancient East Asia",
+      focus: "Velocity, blocking & redirection",
+      desc1: "A flexible weapon consisting of two sections connected by a short chain or cord, designed for rapid strikes.",
+      desc2: "Training focuses on speed, momentum control, and hand-eye coordination to perform striking and parrying combinations.",
+      image: "/weapon_nunchaku.png"
+    },
+    dragon_nunchaku: {
+      title: "Dragon Nunchaku (龍のヌンチャク)",
+      origin: "Traditional / Demonstration",
+      focus: "Kata performance & freestyle forms",
+      desc1: "An ornate pair of nunchaku adorned with traditional dragon motifs, symbolizing power and speed in martial arts.",
+      desc2: "Typically utilized in advanced Kata demonstrations, creative forms, and freestyle martial arts exhibitions.",
+      image: "/weapon_dragon_nunchaku.png"
+    },
+    tonfa: {
+      title: "Tonfa (トンファー)",
+      origin: "Okinawa, Japan",
+      focus: "Forearm shielding & rotational strikes",
+      desc1: "A wooden side-handle baton that provides excellent forearm shielding and swift rotational striking capabilities.",
+      desc2: "Originating from agricultural tools, it is practiced to master close-quarters defense, redirection, and blocking.",
+      image: "/weapon_tonfa.png"
+    },
+    bo_staff: {
+      title: "Bo Staff (棒)",
+      origin: "Ancient Japan",
+      focus: "Long-range control & core rotation",
+      desc1: "A six-foot wooden staff that serves as one of the foundational weapons in traditional Okinawan Kobudo.",
+      desc2: "Promotes full-body coordination, core strength, and range control through thrusting, swinging, and sweeping motions.",
+      image: "/weapon_bo_staff.png"
+    },
+    kama: {
+      title: "Kama (鎌)",
+      origin: "Okinawa, Japan",
+      focus: "Hooking, trapping & close-range slicing",
+      desc1: "A traditional sickle-like agricultural tool adapted into a lethal close-range cutting and hooking weapon.",
+      desc2: "Practiced to improve circular striking, weapon retention, and rapid transitions between offensive and defensive grips.",
+      image: "/weapon_kama.png"
+    }
+  };
+
   useEffect(() => {
     async function loadData() {
       try {
         setLoading(true);
         const [infoRes, instRes, newsRes, trusteeRes, supportingRes] = await Promise.all([
-          fetch("/api/dojo-info").catch(() => null),
-          fetch("/api/instructors").catch(() => null),
-          fetch("/api/news").catch(() => null),
-          fetch("/api/trustees").catch(() => null),
-          fetch("/api/supporting-instructors").catch(() => null)
+          fetch(`/api/dojo-info?t=${Date.now()}`).catch(() => null),
+          fetch(`/api/instructors?t=${Date.now()}`).catch(() => null),
+          fetch(`/api/news?t=${Date.now()}`).catch(() => null),
+          fetch(`/api/trustees?t=${Date.now()}`).catch(() => null),
+          fetch(`/api/supporting-instructors?t=${Date.now()}`).catch(() => null)
         ]);
 
         if (infoRes && infoRes.ok) {
@@ -166,7 +247,6 @@ export default function Home() {
             affiliations: [
               { name: "Shotokon Karate-Do Sports Federation" },
               { name: "Martial Arts Games Federation of India (MGFI)" },
-              { name: "Karate India Organisation (KIO)" },
               { name: "Delhi Olympic Association" }
             ]
           });
@@ -376,12 +456,19 @@ export default function Home() {
 
           {/* Nav items */}
           <nav className="hidden md:flex items-center gap-8 text-sm font-semibold">
+<<<<<<< HEAD
             <a href="/" className="text-red-600 hover:text-red-700 transition-colors">Home</a>
             <a href="/announcements" className="text-muted hover:text-red-600 transition-colors">Announcement</a>
             <a href="/belt-details" className="text-muted hover:text-red-600 transition-colors">Belt Details</a>
             <a href="/weapons" className="text-muted hover:text-red-600 transition-colors">Weapons</a>
+=======
+            <a href="#home" className="text-red-600 hover:text-red-700 transition-colors">Home</a>
+            <a href="#about" className="text-muted hover:text-red-600 transition-colors">Path to Olympics</a>
+            <a href="#belts" className="text-muted hover:text-red-600 transition-colors">Belts</a>
+            <a href="#weapons" className="text-muted hover:text-red-600 transition-colors">Weapons</a>
+>>>>>>> 57761f6 (added new file)
             <a href="#instructors" className="text-muted hover:text-red-600 transition-colors">Instructors</a>
-            <a href="#contact" className="text-muted hover:text-red-600 transition-colors">Contact</a>
+            <a href="#contact" className="text-muted hover:text-red-655 hover:text-red-600 transition-colors">Contact</a>
           </nav>
 
           <div className="flex items-center gap-4">
@@ -430,11 +517,11 @@ export default function Home() {
                 <p className="text-[10px] sm:text-xs text-muted uppercase tracking-wider font-mono">Self Defense Focused</p>
               </div>
               <div>
-                <p className="text-2xl sm:text-3xl font-black text-red-500">Every 3m</p>
+                <p className="text-2xl sm:text-3xl font-black text-red-500">Every 6m</p>
                 <p className="text-[10px] sm:text-xs text-muted uppercase tracking-wider font-mono">Belt Grading Exams</p>
               </div>
               <div>
-                <p className="text-2xl sm:text-3xl font-black text-amber-500">KIO / WKF</p>
+                <p className="text-2xl sm:text-3xl font-black text-amber-500">WKF</p>
                 <p className="text-[10px] sm:text-xs text-muted uppercase tracking-wider font-mono">Official Affiliation</p>
               </div>
             </div>
@@ -468,6 +555,7 @@ export default function Home() {
           </div>
         </section>
 
+<<<<<<< HEAD
         {/* AFFILIATIONS CAROUSEL SECTION */}
         <section className="w-full bg-gradient-to-r from-background via-card/50 to-background py-12">
           <div className="max-w-7xl mx-auto px-6 mb-8">
@@ -570,10 +658,29 @@ export default function Home() {
                   />
                 </div>
               </div>
+=======
+        {/* AFFILIATIONS LOGO SECTION */}
+        <section className="bg-card/45 border-y border-border py-12 relative overflow-hidden transition-colors duration-300">
+          <div className="max-w-7xl mx-auto px-6">
+            <p className="text-center text-[10px] font-mono text-muted uppercase tracking-widest mb-8">
+              Recognized & Affiliated Organizations
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-10 md:gap-14">
+              {AFFILIATIONS_DATA.map((aff, idx) => (
+                <img
+                  key={idx}
+                  src={aff.logo}
+                  alt={aff.name}
+                  title={aff.name}
+                  className="h-20 sm:h-28 md:h-32 w-auto object-contain opacity-95 hover:opacity-100 transition-all duration-305 hover:scale-105"
+                />
+              ))}
+>>>>>>> 57761f6 (added new file)
             </div>
           </div>
         </section>
 
+<<<<<<< HEAD
         {/* FOUNDER & QUOTE SECTION */}
         <section className="max-w-7xl mx-auto px-6 py-20 border-t border-border">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -598,6 +705,119 @@ export default function Home() {
             <div className="space-y-6">
               <div className="space-y-4">
                 <h2 className="text-xs font-mono text-red-500 uppercase tracking-widest font-bold">Our Founder</h2>
+=======
+        {/* PATH TO OLYMPIC GAMES (PROGRAMS) */}
+        <section id="about" className="max-w-7xl mx-auto px-6 py-20">
+          <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
+            <p className="text-3xl sm:text-4xl font-black text-foreground">Path to Olympic Games</p>
+            <p className="text-muted text-sm">
+              Training, Grading & Tournaments.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-16">
+            {/* Program 1 */}
+            <div className="flex flex-col items-center text-center space-y-6 hover:scale-[1.02] transition-all duration-300">
+              <div className="h-56 sm:h-64 md:h-72 flex items-center justify-center">
+                <img
+                  src="/program_belt_grading.png?v=2"
+                  alt="Belt Grading"
+                  className="h-52 sm:h-60 md:h-68 w-auto object-contain hover:scale-105 transition-transform duration-300"
+                />
+              </div>
+              <h3 className="text-3xl font-black text-foreground transition-colors">Belt Grading</h3>
+              <p className="text-muted text-sm sm:text-base leading-relaxed max-w-xs">
+                Every 6 months exams are being conducted to upgrade the titles of students.
+              </p>
+            </div>
+
+            {/* Program 2 */}
+            <div className="flex flex-col items-center text-center space-y-6 hover:scale-[1.02] transition-all duration-300">
+              <div className="h-56 sm:h-64 md:h-72 flex items-center justify-center">
+                <img
+                  src="/program_tournament.png?v=2"
+                  alt="Tournament"
+                  className="h-52 sm:h-60 md:h-68 w-auto object-contain hover:scale-105 transition-transform duration-300"
+                />
+              </div>
+              <h3 className="text-3xl font-black text-foreground transition-colors">Tournament</h3>
+              <p className="text-muted text-sm sm:text-base leading-relaxed max-w-xs">
+                Every Year Inter State, National and International Tournaments are conducted.
+              </p>
+            </div>
+
+            {/* Program 3 */}
+            <div className="flex flex-col items-center text-center space-y-6 hover:scale-[1.02] transition-all duration-300">
+              <div className="h-56 sm:h-64 md:h-72 flex items-center justify-center">
+                <img
+                  src="/program_training.png?v=2"
+                  alt="Training"
+                  className="h-52 sm:h-60 md:h-68 w-auto object-contain hover:scale-105 transition-transform duration-300"
+                />
+              </div>
+              <h3 className="text-3xl font-black text-foreground transition-colors">Training</h3>
+              <p className="text-muted text-sm sm:text-base leading-relaxed max-w-xs">
+                Qualified coaches provide training to students for self defense and Olympic Games.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* INTERACTIVE BELT RANKING SHOWCASE */}
+        <section id="belts" className="max-w-7xl mx-auto px-6 py-20 border-t border-border">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            <div className="lg:col-span-5 space-y-6">
+              <h2 className="text-xs font-mono text-red-500 uppercase tracking-widest">Kyu & Dan Progression</h2>
+              <h3 className="text-3xl sm:text-4xl font-black text-foreground leading-tight">Interactive Belt Syllabus</h3>
+              <p className="text-muted text-sm leading-relaxed">
+                {"In Shotokon Karate, belts represent a student's technical growth, mental maturity, and duration of training. Click on any belt color to see the requirements and meaning of that level."}
+              </p>
+
+              {/* Belt Selector Bar */}
+              <div className="flex flex-wrap gap-2.5">
+                {Object.keys(beltData).map((colorKey) => {
+                  const isActive = activeBelt === colorKey;
+                  return (
+                    <button
+                      key={colorKey}
+                      onClick={() => setActiveBelt(colorKey)}
+                      className={`px-3 py-2 rounded-lg text-xs font-bold uppercase transition-all border cursor-pointer ${
+                        isActive 
+                          ? "bg-red-600 border-red-500 text-white scale-[1.05]" 
+                          : "bg-card border-border text-muted hover:text-foreground hover:bg-slate-50 dark:hover:bg-slate-900"
+                      }`}
+                    >
+                      {colorKey}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="lg:col-span-7 bg-card border border-border rounded-3xl p-6 sm:p-10 relative overflow-hidden">
+              <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-red-500/5 blur-[80px]" />
+              
+              {/* Displaying active belt card details */}
+              <div className="space-y-6 relative z-10 animate-in fade-in duration-300">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <span className="text-xs font-mono text-muted uppercase tracking-wider">RANK LEVEL</span>
+                    <h4 className="text-2xl font-black text-foreground">{beltData[activeBelt].title}</h4>
+                  </div>
+                  <span className="px-3 py-1 rounded-md text-xs font-mono bg-background border border-border text-red-500 dark:text-red-400">
+                    {beltData[activeBelt].kyu}
+                  </span>
+                </div>
+
+                {/* Simulated Belt Strap Visual */}
+                <div className="h-10 w-full rounded-md flex items-center justify-between overflow-hidden shadow-inner border border-border relative bg-background/50">
+                  <div className={`absolute inset-y-0 left-0 w-[80%] ${beltData[activeBelt].color}`} />
+                  <div className="absolute inset-y-0 right-0 w-[20%] bg-background flex items-center justify-center text-[10px] font-bold text-amber-500 border-l border-border">
+                    {activeBelt === "black" ? "1st Dan" : "KYU"}
+                  </div>
+                </div>
+
+>>>>>>> 57761f6 (added new file)
                 <div className="space-y-3">
                   <p className="text-xl sm:text-2xl font-black text-foreground leading-tight italic">
                     "Discipline is the bridge between goals and accomplishment. We build champions of character."
@@ -624,9 +844,112 @@ export default function Home() {
           </div>
         </section>
 
+<<<<<<< HEAD
         {/* INSTRUCTORS SECTION */}
         {instructors.length > 0 && (
           <section id="instructors" className="max-w-7xl mx-auto px-6 py-20 border-t border-border">
+=======
+        {/* KOBUDO WEAPONS SECTION */}
+        <section id="weapons" className="max-w-7xl mx-auto px-6 py-20 border-t border-border">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            <div className="lg:col-span-5 space-y-6">
+              <h2 className="text-xs font-mono text-red-500 uppercase tracking-widest font-bold">Kobudo Martial Arts</h2>
+              <h3 className="text-3xl sm:text-4xl font-black text-foreground leading-tight">Traditional Weaponry</h3>
+              <p className="text-muted text-sm leading-relaxed">
+                Kobudo is the traditional weapons training of Okinawa, designed to complement empty-hand karate. Students learn coordination, focus, and historical martial forms through disciplined practice.
+              </p>
+
+              {/* Weapon Selector Tabs */}
+              <div className="flex flex-col gap-2">
+                {Object.keys(weaponData).map((key) => {
+                  const isActive = activeWeapon === key;
+                  return (
+                    <button
+                      key={key}
+                      onClick={() => setActiveWeapon(key)}
+                      className={`w-full text-left px-5 py-4 rounded-2xl border transition-all duration-200 flex items-center justify-between cursor-pointer group ${
+                        isActive
+                          ? "bg-red-500/10 border-red-500 text-foreground"
+                          : "bg-card border-border text-muted hover:text-foreground hover:bg-slate-50 dark:hover:bg-slate-900"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-2 h-2 rounded-full transition-all duration-200 ${isActive ? "bg-red-500 scale-125" : "bg-transparent group-hover:bg-muted"}`} />
+                        <span className="font-bold text-sm">{weaponData[key].title}</span>
+                      </div>
+                      <span className="text-[10px] font-mono uppercase tracking-wider text-muted opacity-80 group-hover:opacity-100 transition-opacity">
+                        {weaponData[key].origin.split(",")[0]}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Weapon Details Card */}
+            <div className="lg:col-span-7 bg-card border border-border rounded-3xl p-6 sm:p-10 relative overflow-hidden flex flex-col justify-between h-full min-h-[480px]">
+              {/* Decorative radial blur background */}
+              <div className="absolute top-[-20%] right-[-20%] w-[50%] h-[50%] rounded-full bg-gradient-to-tr from-red-600/10 to-amber-500/5 blur-[100px] pointer-events-none" />
+              
+              <div className="space-y-6 relative z-10 flex-1 flex flex-col justify-between">
+                
+                {/* Active Weapon Image Container */}
+                <div className="relative h-64 w-full rounded-2xl overflow-hidden border border-border bg-slate-950/20 flex items-center justify-center p-6 shadow-inner group">
+                  <img
+                    src={weaponData[activeWeapon].image}
+                    alt={weaponData[activeWeapon].title}
+                    className="max-h-full max-w-full object-contain hover:scale-[1.05] transition-transform duration-500 filter drop-shadow-[0_10px_15px_rgba(239,68,68,0.15)]"
+                  />
+                </div>
+
+                <div className="space-y-4">
+                  {/* Title & Metadata */}
+                  <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border pb-4">
+                    <div className="space-y-1">
+                      <span className="text-[10px] font-mono text-red-500 uppercase tracking-widest block font-bold">ACTIVE WEAPON</span>
+                      <h4 className="text-2xl font-black text-foreground">{weaponData[activeWeapon].title}</h4>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <span className="px-3 py-1 rounded-full text-[10px] font-mono bg-background border border-border text-red-650 dark:text-red-400">
+                        Origin: {weaponData[activeWeapon].origin}
+                      </span>
+                      <span className="px-3 py-1 rounded-full text-[10px] font-mono bg-background border border-border text-amber-500 dark:text-amber-400">
+                        {weaponData[activeWeapon].focus}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Two Lines of Description */}
+                  <div className="space-y-3 pt-2">
+                    <span className="text-[10px] font-mono text-muted uppercase tracking-widest block font-bold">Weapon Profile & Info</span>
+                    <div className="space-y-2 text-card-foreground text-sm sm:text-base leading-relaxed">
+                      <p className="flex items-start gap-3">
+                        <span className="w-1.5 h-1.5 rounded-full bg-red-505 bg-red-500 mt-2 flex-shrink-0" />
+                        <span>{weaponData[activeWeapon].desc1}</span>
+                      </p>
+                      <p className="flex items-start gap-3">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 mt-2 flex-shrink-0" />
+                        <span>{weaponData[activeWeapon].desc2}</span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-6 border-t border-border flex items-center justify-between text-xs text-muted">
+                  <span>Class Availability:</span>
+                  <span className="font-mono text-foreground font-bold bg-background px-3 py-1 rounded-lg border border-border">
+                    Intermediate & Advanced Levels
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* LEADERSHIP & TRUSTEES SECTION */}
+        {trustees.length > 0 && (
+          <section id="trustees" className="max-w-7xl mx-auto px-6 py-20 border-t border-border">
+>>>>>>> 57761f6 (added new file)
             <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
               <h2 className="text-xs font-mono text-red-500 uppercase tracking-widest font-bold">Elite Instructors</h2>
               <p className="text-3xl sm:text-4xl font-black text-foreground">Our Expert Coaches</p>
@@ -919,9 +1242,39 @@ export default function Home() {
             </div>
           </div>
 
+<<<<<<< HEAD
           <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-[10px] text-gray-400">© {new Date().getFullYear()} {dojoInfo?.name || "Okinawa Shotokon"}. All Rights Reserved.</p>
             <span className="text-[10px] text-red-500">Affiliated with GKSF & KIO</span>
+=======
+          <div className="md:col-span-3 space-y-3">
+            <h4 className="text-xs font-mono text-muted uppercase tracking-widest">Quick Links</h4>
+            <ul className="space-y-2 text-muted">
+              <li><a href="#home" className="hover:text-red-500 transition-colors">Home</a></li>
+              <li><a href="#about" className="hover:text-red-500 transition-colors">Path to Olympic Games</a></li>
+              <li><a href="#belts" className="hover:text-red-555 hover:text-red-500 transition-colors">Belt Syllabus</a></li>
+              <li><a href="#weapons" className="hover:text-red-555 hover:text-red-500 transition-colors">Weapons Showcase</a></li>
+              <li><a href="#instructors" className="hover:text-red-555 hover:text-red-500 transition-colors">Senseis & Coaches</a></li>
+            </ul>
+          </div>
+
+          <div className="md:col-span-4 space-y-3">
+            <h4 className="text-xs font-mono text-muted uppercase tracking-widest">Office Hours</h4>
+            <ul className="space-y-2 text-muted">
+              <li>Monday - Friday: 5:00 PM - 8:30 PM</li>
+              <li>Saturday: 8:00 AM - 11:30 AM</li>
+              <li>Sunday: Weekly Off / Special Seminars</li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-6 pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4 text-[10px] font-mono">
+          <p>© {new Date().getFullYear()} {dojoInfo?.name || "Okinawa Shotokon"}. All Rights Reserved.</p>
+          <div className="flex items-center gap-6">
+            <span className="text-red-500/80">Affiliated with GKSF</span>
+            <span className="text-border">|</span>
+            <a href="/admin" className="hover:text-foreground">Admin Login</a>
+>>>>>>> 57761f6 (added new file)
           </div>
         </div>
       </footer>

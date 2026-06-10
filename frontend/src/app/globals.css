@@ -18,7 +18,7 @@
   --card-gradient-end: rgba(241, 245, 249, 0.9);
 }
 
-@theme inline {
+theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
