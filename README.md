@@ -1,4 +1,4 @@
-# Skybound Aero Adventures Portal
+# Skybound Martial Arts Academy
 
 Welcome to **Skybound**, a complete, ready-to-run modern stack showcasing a decoupled frontend and backend connected via Next.js internal rewrite proxying and Ngrok.
 
