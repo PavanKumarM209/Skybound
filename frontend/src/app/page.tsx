@@ -50,6 +50,8 @@ export default function Home() {
   const [news, setNews] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCity, setSelectedCity] = useState("All");
+  const [recognizationImages, setRecognizationImages] = useState<string[]>([]);
+  const [selectedGalleryImage, setSelectedGalleryImage] = useState<string | null>(null);
 
 
 
@@ -64,6 +66,7 @@ export default function Home() {
   const [bookingSuccess, setBookingSuccess] = useState(false);
   const [bookingError, setBookingError] = useState<string | null>(null);
   const [selectedInstructor, setSelectedInstructor] = useState("");
+  const [minDate, setMinDate] = useState("");
 
   // Map Modal State
   const [showMapModal, setShowMapModal] = useState(false);
@@ -142,15 +145,22 @@ export default function Home() {
   };
 
   useEffect(() => {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    setMinDate(`${yyyy}-${mm}-${dd}`);
+
     async function loadData() {
       try {
         setLoading(true);
-        const [infoRes, instRes, newsRes, trusteeRes, supportingRes] = await Promise.all([
+        const [infoRes, instRes, newsRes, trusteeRes, supportingRes, recognizationRes] = await Promise.all([
           fetch("/api/dojo-info").catch(() => null),
           fetch("/api/instructors").catch(() => null),
           fetch("/api/news").catch(() => null),
           fetch("/api/trustees").catch(() => null),
-          fetch("/api/supporting-instructors").catch(() => null)
+          fetch("/api/supporting-instructors").catch(() => null),
+          fetch("/api/recognization-images").catch(() => null)
         ]);
 
         if (infoRes && infoRes.ok) {
@@ -264,6 +274,11 @@ export default function Home() {
         if (newsRes && newsRes.ok) {
           const newsData = await newsRes.json();
           setNews(newsData);
+        }
+
+        if (recognizationRes && recognizationRes.ok) {
+          const recognizationData = await recognizationRes.json();
+          setRecognizationImages(recognizationData);
         }
       } catch (error) {
         console.error("Failed to fetch dojo data", error);
@@ -473,104 +488,160 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-6 mb-8">
             <div className="text-center space-y-2">
               <h2 className="text-xs font-mono text-red-500 uppercase tracking-widest">Recognized & Affiliated</h2>
-              <p className="text-2xl font-black text-foreground">Our Partnerships</p>
+              <p className="text-2xl font-black text-foreground">Our Recognitions</p>
             </div>
           </div>
 
           {/* Animated Carousel */}
           <div className="max-w-7xl mx-auto px-6">
-            <style>{`
-              @keyframes scroll {
-                0% {
-                  transform: translateX(0);
-                }
-                100% {
-                  transform: translateX(calc(-240px * 4));
-                }
-              }
-              .carousel-wrapper {
-                overflow: hidden;
-              }
-              .carousel-track {
-                display: flex;
-                animation: scroll 12s linear infinite;
-                gap: 0;
-              }
-              .carousel-track:hover {
-                animation-play-state: paused;
-              }
-              .carousel-logo {
-                min-width: 240px;
-                height: 120px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-              }
-            `}</style>
+            {recognizationImages.length > 0 ? (
+              <>
+                <style>{`
+                  @keyframes scroll {
+                    0% {
+                      transform: translateX(0);
+                    }
+                    100% {
+                      transform: translateX(calc(-240px * ${recognizationImages.length}));
+                    }
+                  }
+                  .carousel-wrapper {
+                    overflow: hidden;
+                  }
+                  .carousel-track {
+                    display: flex;
+                    animation: scroll ${Math.max(12, recognizationImages.length * 3.5)}s linear infinite;
+                    gap: 0;
+                  }
+                  .carousel-track:hover {
+                    animation-play-state: paused;
+                  }
+                  .carousel-logo {
+                    min-width: 240px;
+                    height: 120px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                  }
+                `}</style>
 
-            <div className="carousel-wrapper">
-              <div className="carousel-track">
-                {/* Set 1 */}
-                <div className="carousel-logo">
-                  <img
-                    src="/shotokon-karate-do-sports-federation.jpeg"
-                    alt="Shotokon"
-                    className="h-20 object-contain"
-                  />
+                <div className="carousel-wrapper">
+                  <div className="carousel-track">
+                    {/* Set 1 */}
+                    {recognizationImages.map((imgUrl, idx) => (
+                      <div key={`set1-${idx}`} className="carousel-logo px-4">
+                        <img
+                          src={imgUrl}
+                          alt={`Recognition ${idx}`}
+                          className="h-20 max-w-[200px] object-contain hover:scale-105 transition-transform duration-300 cursor-pointer"
+                          onClick={() => setSelectedGalleryImage(imgUrl)}
+                        />
+                      </div>
+                    ))}
+                    {/* Set 2 - Seamless repeat */}
+                    {recognizationImages.map((imgUrl, idx) => (
+                      <div key={`set2-${idx}`} className="carousel-logo px-4">
+                        <img
+                          src={imgUrl}
+                          alt={`Recognition Repeat ${idx}`}
+                          className="h-20 max-w-[200px] object-contain hover:scale-105 transition-transform duration-300 cursor-pointer"
+                          onClick={() => setSelectedGalleryImage(imgUrl)}
+                        />
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div className="carousel-logo">
-                  <img
-                    src="/karate-india-organisation-kio.png"
-                    alt="Karate India"
-                    className="h-20 object-contain"
-                  />
-                </div>
-                <div className="carousel-logo">
-                  <img
-                    src="/martial-arts-games-federation-mgfi.webp"
-                    alt="MGFI"
-                    className="h-20 object-contain"
-                  />
-                </div>
-                <div className="carousel-logo">
-                  <img
-                    src="/delhi-olympic-association.jpg"
-                    alt="Delhi Olympics"
-                    className="h-20 object-contain"
-                  />
-                </div>
+              </>
+            ) : (
+              <>
+                <style>{`
+                  @keyframes scroll {
+                    0% {
+                      transform: translateX(0);
+                    }
+                    100% {
+                      transform: translateX(calc(-240px * 4));
+                    }
+                  }
+                  .carousel-wrapper {
+                    overflow: hidden;
+                  }
+                  .carousel-track {
+                    display: flex;
+                    animation: scroll 12s linear infinite;
+                    gap: 0;
+                  }
+                  .carousel-logo {
+                    min-width: 240px;
+                    height: 120px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                  }
+                `}</style>
 
-                {/* Set 2 - Seamless repeat */}
-                <div className="carousel-logo">
-                  <img
-                    src="/shotokon-karate-do-sports-federation.jpeg"
-                    alt="Shotokon"
-                    className="h-20 object-contain"
-                  />
+                <div className="carousel-wrapper">
+                  <div className="carousel-track">
+                    <div className="carousel-logo">
+                      <img
+                        src="/shotokon-karate-do-sports-federation.jpeg"
+                        alt="Shotokon"
+                        className="h-20 object-contain"
+                      />
+                    </div>
+                    <div className="carousel-logo">
+                      <img
+                        src="/karate-india-organisation-kio.png"
+                        alt="Karate India"
+                        className="h-20 object-contain"
+                      />
+                    </div>
+                    <div className="carousel-logo">
+                      <img
+                        src="/martial-arts-games-federation-mgfi.webp"
+                        alt="MGFI"
+                        className="h-20 object-contain"
+                      />
+                    </div>
+                    <div className="carousel-logo">
+                      <img
+                        src="/delhi-olympic-association.jpg"
+                        alt="Delhi Olympics"
+                        className="h-20 object-contain"
+                      />
+                    </div>
+                    <div className="carousel-logo">
+                      <img
+                        src="/shotokon-karate-do-sports-federation.jpeg"
+                        alt="Shotokon"
+                        className="h-20 object-contain"
+                      />
+                    </div>
+                    <div className="carousel-logo">
+                      <img
+                        src="/karate-india-organisation-kio.png"
+                        alt="Karate India"
+                        className="h-20 object-contain"
+                      />
+                    </div>
+                    <div className="carousel-logo">
+                      <img
+                        src="/martial-arts-games-federation-mgfi.webp"
+                        alt="MGFI"
+                        className="h-20 object-contain"
+                      />
+                    </div>
+                    <div className="carousel-logo">
+                      <img
+                        src="/delhi-olympic-association.jpg"
+                        alt="Delhi Olympics"
+                        className="h-20 object-contain"
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div className="carousel-logo">
-                  <img
-                    src="/karate-india-organisation-kio.png"
-                    alt="Karate India"
-                    className="h-20 object-contain"
-                  />
-                </div>
-                <div className="carousel-logo">
-                  <img
-                    src="/martial-arts-games-federation-mgfi.webp"
-                    alt="MGFI"
-                    className="h-20 object-contain"
-                  />
-                </div>
-                <div className="carousel-logo">
-                  <img
-                    src="/delhi-olympic-association.jpg"
-                    alt="Delhi Olympics"
-                    className="h-20 object-contain"
-                  />
-                </div>
-              </div>
-            </div>
+              </>
+            )}
           </div>
         </section>
 
@@ -708,6 +779,8 @@ export default function Home() {
           </section>
         )}
 
+
+
       </main>
 
       {/* POPUP MODAL FOR HEADER TRIAL BUTTON */}
@@ -814,6 +887,7 @@ export default function Home() {
                     <input
                       type="date"
                       required
+                      min={minDate}
                       value={bookingDate}
                       onChange={(e) => setBookingDate(e.target.value)}
                       className="w-full px-4 py-2.5 rounded-xl bg-background border border-border focus:border-red-500 text-foreground outline-none text-sm transition"
@@ -945,6 +1019,30 @@ export default function Home() {
                 className="w-full h-full border-0"
                 allowFullScreen
                 loading="lazy"
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* GALLERY LIGHTBOX MODAL */}
+      {selectedGalleryImage && (
+        <div className="fixed inset-0 z-55 flex items-center justify-center bg-slate-950/90 backdrop-blur-xs p-4" onClick={() => setSelectedGalleryImage(null)}>
+          <div className="relative max-w-4xl w-full flex flex-col items-center" onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={() => setSelectedGalleryImage(null)}
+              className="absolute -top-12 right-0 text-white hover:text-red-500 transition-colors p-2 text-sm font-black cursor-pointer flex items-center gap-1 bg-slate-900/50 px-3 py-1.5 rounded-xl border border-white/10"
+            >
+              <span>Close</span>
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden shadow-2xl p-1 max-h-[80vh] flex items-center justify-center">
+              <img
+                src={selectedGalleryImage}
+                alt="Selected Recognition"
+                className="max-h-[75vh] max-w-full object-contain rounded-xl"
               />
             </div>
           </div>
