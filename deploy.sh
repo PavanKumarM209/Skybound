@@ -17,7 +17,7 @@ if [ ! -f "$APP_DIR/backend/.env" ]; then
 fi
 
 # Verify SSL cert exists
-if [ ! -f "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" ]; then
+if ! sudo test -f "/etc/letsencrypt/live/$DOMAIN/fullchain.pem"; then
     echo "ERROR: SSL certificate not found for $DOMAIN."
     echo "Run ./setup.sh first."
     exit 1
