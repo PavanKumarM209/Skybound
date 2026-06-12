@@ -26,7 +26,7 @@ fi
 cd "$APP_DIR"
 
 echo "[1/4] Pulling latest code..."
-git pull origin main
+git pull origin test
 
 echo "[2/4] Building Docker images..."
 docker compose build --no-cache
