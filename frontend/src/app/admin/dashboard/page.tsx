@@ -419,6 +419,7 @@ export default function AdminDashboard() {
   };
 
   const getInstructorName = (instructorId: string) => {
+    if (instructorId === "umapathi_master_class") return "Umapathi Master Class";
     const instructor = instructors.find((i) => i._id === instructorId);
     return instructor?.name || "Unknown";
   };

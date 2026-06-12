@@ -32,7 +32,7 @@ export default function BeltDetails() {
       desc: "Represents purity, innocence, and a blank canvas. The practitioner begins their journey, learning basic stances and proper dojo etiquette.",
       duration: "Commencement of training. Ready for grading after basic dojo integration.",
       months: "Start",
-      bgColor: "from-slate-50 to-white text-slate-800 border-slate-200",
+      bgColor: "from-white to-slate-100",
       textColor: "text-slate-800",
       stripes: 0,
       syllabus: ["Dojo Bowing & Etiquette", "Seiken Choku-Tsuki (Straight Punch)", "Jodan Uke (High Block)", "Mae-Geri (Front Kick)"],
@@ -46,7 +46,7 @@ export default function BeltDetails() {
       desc: "Represents the first ray of sunlight. Focuses on developing coordination, balance, and basic footwork transitions.",
       duration: "The beginner's first test will be conducted 4 months after the commencement of the karate training.",
       months: "4 Months",
-      bgColor: "from-amber-350 to-amber-450",
+      bgColor: "from-amber-400 to-amber-500",
       textColor: "text-amber-950",
       stripes: 0,
       syllabus: ["Taikyoku Shodan Kata", "Chudan Uchi-Uke (Inner Block)", "Side Kick Drills", "Step Sparring (Gohon Kumite)"],
@@ -179,7 +179,7 @@ export default function BeltDetails() {
       bgColor: "from-slate-900 to-black",
       textColor: "text-white",
       stripes: 1,
-      stripeColor: "bg-amber-450",
+      stripeColor: "bg-amber-500",
       syllabus: ["Tekki Shodan Kata", "Dan Grade Katas", "Master Panel Evaluation", "Lifetime Dojo Pledge"],
       tips: "A Black Belt is a white belt who never gave up. Lead by example and continue training daily."
     }
@@ -244,7 +244,7 @@ export default function BeltDetails() {
               >
                 {/* Woven Fabric Styled Belt Accent */}
                 <div
-                  className="relative h-7 w-full rounded-lg overflow-hidden border border-slate-350 shadow-xs mb-5 flex items-center justify-end"
+                  className="relative h-7 w-full rounded-lg overflow-hidden border border-slate-300 shadow-xs mb-5 flex items-center justify-end"
                   style={{
                     boxShadow: "inset 0 1px 3px rgba(0,0,0,0.15), inset 0 -1px 3px rgba(255,255,255,0.1)"
                   }}
@@ -298,7 +298,7 @@ export default function BeltDetails() {
 
                 {/* Duration info block */}
                 <div className="bg-slate-50/80 border border-slate-200/50 rounded-2xl p-4.5 space-y-3 mb-5">
-                  <div className="flex items-center justify-between border-b border-slate-250/30 pb-2">
+                  <div className="flex items-center justify-between border-b border-slate-200/30 pb-2">
                     <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
                       Exam Duration
                     </span>
@@ -306,7 +306,7 @@ export default function BeltDetails() {
                       {belt.months}
                     </span>
                   </div>
-                  <p className="text-slate-650 text-xs font-bold leading-relaxed">
+                  <p className="text-slate-600 text-xs font-bold leading-relaxed">
                     {belt.duration}
                   </p>
                 </div>
@@ -356,9 +356,9 @@ export default function BeltDetails() {
 
             <div className="grid grid-cols-2 sm:grid-cols-6 gap-3 text-center text-[10px] font-black uppercase">
               {[
-                { label: "White Belt", val: "0 Months", bg: "bg-slate-50 text-slate-850" },
+                { label: "White Belt", val: "0 Months", bg: "bg-slate-50 text-slate-900" },
                 { label: "Yellow Belt", val: "4 Months", bg: "bg-amber-50 text-amber-800" },
-                { label: "Orange Belt", val: "8 Months", bg: "bg-orange-50 text-orange-850" },
+                { label: "Orange Belt", val: "8 Months", bg: "bg-orange-50 text-orange-900" },
                 { label: "Green / Blue", val: "12 - 16 Months", bg: "bg-blue-50 text-blue-800" },
                 { label: "Purple / Brown", val: "22 - 46 Months", bg: "bg-amber-50 text-amber-950" },
                 { label: "Black Belt", val: "HQ Grading", bg: "bg-slate-900 text-white" }
@@ -390,7 +390,7 @@ export default function BeltDetails() {
             {/* Modal Header */}
             <div className="flex items-center gap-4 border-b border-slate-100 pb-4">
               <div
-                className="w-16 h-8 rounded-md border border-slate-350 shadow-xs flex items-center justify-end overflow-hidden shrink-0 relative"
+                className="w-16 h-8 rounded-md border border-slate-300 shadow-xs flex items-center justify-end overflow-hidden shrink-0 relative"
               >
                 <div className={`absolute inset-0 bg-gradient-to-r ${selectedBelt.bgColor}`} />
                 {/* Woven Cross-Hatch */}
@@ -416,7 +416,7 @@ export default function BeltDetails() {
               </div>
 
               <div>
-                <span className="text-[9px] font-black uppercase tracking-wider text-red-650 bg-red-50 border border-red-100 px-2 py-0.5 rounded">
+                <span className="text-[9px] font-black uppercase tracking-wider text-red-600 bg-red-50 border border-red-100 px-2 py-0.5 rounded">
                   {selectedBelt.kyu}
                 </span>
                 <h3 className="text-2xl font-black text-slate-800 mt-1">{selectedBelt.title}</h3>
@@ -427,13 +427,13 @@ export default function BeltDetails() {
             <div className="space-y-4">
               <div>
                 <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1.5">Description</h4>
-                <p className="text-slate-650 text-xs md:text-sm font-semibold leading-relaxed">
+                <p className="text-slate-600 text-xs md:text-sm font-semibold leading-relaxed">
                   {selectedBelt.desc}
                 </p>
               </div>
 
               <div className="bg-slate-50 border border-slate-200/50 rounded-2xl p-4.5 space-y-2">
-                <h4 className="text-[10px] font-black text-slate-450 uppercase tracking-widest">Exam Interval Guideline</h4>
+                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Exam Interval Guideline</h4>
                 <p className="text-slate-700 text-xs md:text-sm font-extrabold">
                   {selectedBelt.duration}
                 </p>
@@ -444,7 +444,7 @@ export default function BeltDetails() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {selectedBelt.syllabus.map((req, idx) => (
                     <div key={idx} className="flex items-center gap-2.5 bg-slate-50/40 border border-slate-100 p-2.5 rounded-xl">
-                      <div className="w-5 h-5 rounded-full bg-emerald-50 border border-emerald-250 flex items-center justify-center text-emerald-600 shrink-0">
+                      <div className="w-5 h-5 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 shrink-0">
                         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3.5">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                         </svg>

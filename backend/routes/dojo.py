@@ -275,7 +275,8 @@ def delete_supporting_instructor(id):
 def get_recognization_images():
     try:
         import os
-        recognization_dir = "/home/infaira/Desktop/skybound/frontend/public/recognization"
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        recognization_dir = os.path.normpath(os.path.join(current_dir, "..", "..", "frontend", "public", "recognization"))
         if os.path.exists(recognization_dir):
             files = os.listdir(recognization_dir)
             image_extensions = ('.png', '.jpg', '.jpeg', '.webp', '.PNG', '.JPG', '.JPEG', '.WEBP')

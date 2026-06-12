@@ -22,10 +22,11 @@ JSON_DB_PATH = os.path.join(os.path.dirname(__file__), "db.json")
 DEFAULT_DB = {
     "dojo_info": {
         "name": "Sky Bound Martial Arts Academy",
-        "phone": "+91 85100 00838",
-        "email": "contact@skyboundkarate.in",
-        "address": "X-1/32, Daal Mill Road, Budh Vihar, Phase-1, New Delhi-110086, India",
-        "map_embed": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3498.4239857905183!2d77.098485!3d28.736785!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390d068593a201c1%3A0xe54fb7a28e932ec3!2sBudh%20Vihar%20Phase%20I%2C%20Budh%20Vihar%2C%20Delhi%2C%20110086!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin",
+        "phone": "+91 90357 07028",
+        "email": "skyboundmartialartsacademy@gmail.com",
+        "address": "Chandu Dance Studio, near Mandara school, Doddabidarakallu, Bengaluru, Karnataka 560073",
+        "instagram": "sky_bound_martial_arts_academy",
+        "map_embed": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3886.685387063688!2d77.5029497!3d13.0238805!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bae3d5ab7d018f5%3A0x3a89d87e00454a35!2sChandu+Dance+Studio!5e0!3m2!1sen!2sin!4v1700000000000",
         "affiliations": [
             {"name": "Shotokon Karate-Do Sports Federation"},
             {"name": "Martial Arts Games Federation of India (MGFI)"},

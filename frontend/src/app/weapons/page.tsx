@@ -84,6 +84,13 @@ export default function WeaponsAndKatas() {
       desc: "Dual wooden batons with perpendicular handles. Traditionally used to reinforce the forearm for powerful shields and rotating punches.",
       image: "/weapon_tonfa.png",
       focus: "Forearm blocking, spinning strikes, and structural shield alignment."
+    },
+    {
+      name: "Kama",
+      translation: "Okinawan Sickles",
+      desc: "Traditional Okinawan sickles used in pairs. Originally farming tools for harvesting crops, they feature curved steel blades and wooden handles used to trap opponent weapons and deliver quick close-range counterstrikes.",
+      image: "/weapon_kama.png",
+      focus: "Dual-hand coordination, blade-trapping techniques, and quick hooking blocks."
     }
   ];
 
@@ -102,7 +109,7 @@ export default function WeaponsAndKatas() {
           
           {/* Header Section */}
           <div className="text-center max-w-3xl mx-auto mb-16 space-y-5">
-            <span className="inline-flex items-center gap-1.5 px-4.5 py-1.5 bg-red-50 text-red-650 font-black text-[10px] rounded-full uppercase tracking-widest border border-red-200/50">
+            <span className="inline-flex items-center gap-1.5 px-4.5 py-1.5 bg-red-50 text-red-600 font-black text-[10px] rounded-full uppercase tracking-widest border border-red-200/50">
               <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse" />
               Syllabus Curriculum
             </span>
@@ -280,7 +287,7 @@ export default function WeaponsAndKatas() {
                     <div className="p-6 md:p-8 space-y-4 flex-1 flex flex-col justify-between">
                       <div className="space-y-2">
                         <div className="flex justify-between items-center">
-                          <h3 className="text-2xl font-black text-slate-800 group-hover:text-red-650 transition-colors">
+                          <h3 className="text-2xl font-black text-slate-800 group-hover:text-red-600 transition-colors">
                             {weapon.name}
                           </h3>
                           <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 border border-slate-200 px-2.5 py-0.5 rounded-md">

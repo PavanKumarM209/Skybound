@@ -429,7 +429,7 @@ export default function StudentDashboard() {
                                 />
                               </div>
                             )}
-                            <h3 className="font-extrabold text-slate-800 text-sm group-hover:text-red-650 transition-colors">{news[0].title}</h3>
+                            <h3 className="font-extrabold text-slate-800 text-sm group-hover:text-red-600 transition-colors">{news[0].title}</h3>
                             <p className="text-xs text-slate-500 line-clamp-3 leading-relaxed">{news[0].description}</p>
                           </div>
                         ) : (

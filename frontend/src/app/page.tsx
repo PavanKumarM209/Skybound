@@ -13,6 +13,7 @@ interface DojoInfo {
   address: string;
   map_embed: string;
   affiliations: Affiliation[];
+  instagram?: string;
 }
 
 interface Instructor {
@@ -90,7 +91,7 @@ export default function Home() {
       title: "White Belt",
       kyu: "10th Kyu",
       desc: "Foundation, purity, and the beginning of a practitioner's martial arts journey. Focuses on basic stances, blocks, and strikes.",
-      color: "bg-white text-slate-900 border-slate-350 border",
+      color: "bg-white text-slate-900 border-slate-300 border",
       border: "border-slate-300"
     },
     yellow: {
@@ -133,7 +134,7 @@ export default function Home() {
       kyu: "2nd & 1st Kyu",
       desc: "Represents the ripening of a seed. Focus shifts to internal energy, breathing patterns (Sanchin), and tactical defense.",
       color: "bg-amber-800 text-white border border-amber-950",
-      border: "border-amber-955"
+      border: "border-amber-950"
     },
     black: {
       title: "Black Belt",
@@ -155,7 +156,7 @@ export default function Home() {
       try {
         setLoading(true);
         const [infoRes, instRes, newsRes, trusteeRes, supportingRes, recognizationRes] = await Promise.all([
-          fetch("/api/dojo-info").catch(() => null),
+          fetch("/api/dojo-info?_t=" + Date.now()).catch(() => null),
           fetch("/api/instructors").catch(() => null),
           fetch("/api/news").catch(() => null),
           fetch("/api/trustees").catch(() => null),
@@ -169,10 +170,11 @@ export default function Home() {
         } else {
           setDojoInfo({
             name: "Okinawa Shotokon Karate Do",
-            phone: "+91 85100 00838",
-            email: "contact@internationalkarate.in",
-            address: "X-1/32, Daal Mill Road, Budh Vihar, Phase-1, New Delhi-110086, India",
-            map_embed: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3498.4239857905183!2d77.098485!3d28.736785!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390d068593a201c1%3A0xe54fb7a28e932ec3!2sBudh%20Vihar%20Phase%20I%2C%20Budh%20Vihar%2C%20Delhi%2C%20110086!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin",
+            phone: "+91 90357 07028",
+            email: "skyboundmartialartsacademy@gmail.com",
+            address: "Chandu Dance Studio, near Mandara school, Doddabidarakallu, Bengaluru, Karnataka 560073",
+            instagram: "sky_bound_martial_arts_academy",
+            map_embed: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3886.685387063688!2d77.5029497!3d13.0238805!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bae3d5ab7d018f5%3A0x3a89d87e00454a35%2sChandu+Dance+Studio!5e0!3m2!1sen!2sin!4v1700000000000",
             affiliations: [
               { name: "Shotokon Karate-Do Sports Federation" },
               { name: "Martial Arts Games Federation of India (MGFI)" },
@@ -445,11 +447,11 @@ export default function Home() {
                 <p className="text-[10px] sm:text-xs text-muted uppercase tracking-wider font-mono">Self Defense Focused</p>
               </div>
               <div>
-                <p className="text-2xl sm:text-3xl font-black text-red-500">Every 3m</p>
+                <p className="text-2xl sm:text-3xl font-black text-red-500">Every 6 months</p>
                 <p className="text-[10px] sm:text-xs text-muted uppercase tracking-wider font-mono">Belt Grading Exams</p>
               </div>
               <div>
-                <p className="text-2xl sm:text-3xl font-black text-amber-500">KIO / WKF</p>
+                <p className="text-2xl sm:text-3xl font-black text-amber-500">WKF</p>
                 <p className="text-[10px] sm:text-xs text-muted uppercase tracking-wider font-mono">Official Affiliation</p>
               </div>
             </div>
@@ -666,7 +668,7 @@ export default function Home() {
             </div>
 
             {/* Right - Quote & Info */}
-            <div className="space-y-6">
+            <div className="space-y-6 relative z-10">
               <div className="space-y-4">
                 <h2 className="text-xs font-mono text-red-500 uppercase tracking-widest font-bold">Our Founder</h2>
                 <div className="space-y-3">
@@ -674,17 +676,36 @@ export default function Home() {
                     "Discipline is the bridge between goals and accomplishment. We build champions of character."
                   </p>
                   <div className="space-y-0.5 pt-4 border-t border-border">
-                    <p className="text-base font-bold text-foreground">Renshi Umapathi S S</p>
+                    <p className="text-xl sm:text-2xl font-black text-foreground">Master Umapathi S S</p>
                     <p className="text-xs text-red-500 uppercase tracking-wider font-semibold">Founder, President & Chief Coach</p>
-                    <p className="text-[10px] text-muted">Sky Bound Martial Arts Academy</p>
+                    <p className="text-[10px] text-muted block">Sky Bound Martial Arts Academy</p>
+                    <div className="pt-2 flex flex-col space-y-1 text-xs">
+                      <a href="tel:+919035707028" className="text-red-500 hover:text-red-600 font-semibold transition-colors flex items-center gap-1.5 w-fit">
+                        <svg className="w-3.5 h-3.5 text-red-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.387a12.035 12.035 0 01-7.147-7.147c-.155-.441.011-.928.387-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+                        </svg>
+                        +91 90357 07028
+                      </a>
+                      <a
+                        href="https://mail.google.com/mail/?view=cm&fs=1&to=ussumesh@gmail.com"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-red-500 hover:text-red-600 font-semibold transition-colors flex items-center gap-1.5 w-fit"
+                      >
+                        <svg className="w-3.5 h-3.5 text-red-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                        </svg>
+                        ussumesh@gmail.com
+                      </a>
+                    </div>
                   </div>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-card border border-border p-3 rounded-lg space-y-1">
-                  <p className="text-xl font-black text-red-500">25+</p>
-                  <p className="text-[10px] text-muted uppercase tracking-wider">Years Experience</p>
+                  <p className="text-xl font-black text-red-500">30+</p>
+                  <p className="text-[10px] text-muted uppercase tracking-wider">Years of Experience</p>
                 </div>
                 <div className="bg-card border border-border p-3 rounded-lg space-y-1">
                   <p className="text-xl font-black text-amber-500">1000+</p>
@@ -753,6 +774,13 @@ export default function Home() {
                       <h3 className="text-base font-bold text-foreground">
                         {inst.name}
                       </h3>
+
+                      {/* Role */}
+                      {inst.role && (
+                        <p className="text-xs font-semibold text-red-500">
+                          {inst.role}
+                        </p>
+                      )}
 
                       {/* Location */}
                       <p className="text-xs text-muted">
@@ -856,16 +884,17 @@ export default function Home() {
                   >
                     <option value="">Choose an instructor or admin...</option>
                     {instructors.length > 0 && (
-                      <>
-                        <optgroup label="Instructors">
-                          {instructors.map((inst) => (
-                            <option key={inst._id} value={inst._id}>
-                              {inst.name} - {inst.rank}
-                            </option>
-                          ))}
-                        </optgroup>
-                      </>
+                      <optgroup label="Instructors">
+                        {instructors.map((inst) => (
+                          <option key={inst._id} value={inst._id}>
+                            {inst.name} - {inst.rank}
+                          </option>
+                        ))}
+                      </optgroup>
                     )}
+                    <optgroup label="Master Class / Admin">
+                      <option value="umapathi_master_class">Umapathi Master Class</option>
+                    </optgroup>
                   </select>
                 </div>
 
@@ -902,7 +931,7 @@ export default function Home() {
                 )}
 
                 {bookingSuccess && (
-                  <p className="text-xs text-emerald-605 dark:text-emerald-450 font-mono bg-emerald-950/20 border border-emerald-900/30 p-2.5 rounded-lg flex items-center gap-2">
+                  <p className="text-xs text-emerald-600 dark:text-emerald-400 font-mono bg-emerald-950/20 border border-emerald-900/30 p-2.5 rounded-lg flex items-center gap-2">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
                     Trial requested successfully! Sensei will call you soon.
                   </p>
@@ -935,25 +964,49 @@ export default function Home() {
             <div className="space-y-4">
               <h4 className="text-sm font-bold text-white uppercase tracking-wider">Contact Us</h4>
               <div className="space-y-3">
-                <div
-                  className="flex items-start gap-3 cursor-pointer hover:text-red-400 transition-colors group"
-                  onClick={() => setShowMapModal(true)}
+                <a
+                  href="https://maps.app.goo.gl/DAb6nLMFRbYg9wGUA?g_st=aw"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-start gap-3 hover:text-red-400 transition-colors group"
                 >
-                  <span className="text-red-500 text-lg mt-1">📍</span>
+                  <svg className="w-5 h-5 text-red-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
                   <p className="text-xs leading-relaxed text-gray-300 group-hover:text-red-400">
-                    {dojoInfo?.address || "X-1/32, Daal Mill Road, Budh Vihar, Phase-1, New Delhi-110086, India"}
+                    {dojoInfo?.address || "Chandu Dance Studio, near Mandara school, Doddabidarakallu, Bengaluru, Karnataka 560073"}
                   </p>
-                </div>
+                </a>
                 <div className="flex items-center gap-3">
-                  <span className="text-red-500 text-lg">📞</span>
-                  <a href={`tel:${dojoInfo?.phone}`} className="text-gray-300 hover:text-red-400 transition-colors">
-                    {dojoInfo?.phone || "+91 85100 00838"}
+                  <svg className="w-5 h-5 text-red-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                  </svg>
+                  <a href={`tel:${dojoInfo?.phone || "+919035707028"}`} className="text-gray-300 hover:text-red-400 transition-colors">
+                    {dojoInfo?.phone || "+91 90357 07028"}
                   </a>
                 </div>
                 <div className="flex items-start gap-3">
-                  <span className="text-red-500 text-lg">✉️</span>
-                  <a href={`mailto:${dojoInfo?.email}`} className="text-gray-300 hover:text-red-400 transition-colors break-all">
-                    {dojoInfo?.email || "contact@skyboundkarate.in"}
+                  <svg className="w-5 h-5 text-red-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  <a
+                    href={`https://mail.google.com/mail/?view=cm&fs=1&to=${dojoInfo?.email || "skyboundmartialartsacademy@gmail.com"}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-300 hover:text-red-400 transition-colors break-all"
+                  >
+                    {dojoInfo?.email || "skyboundmartialartsacademy@gmail.com"}
+                  </a>
+                </div>
+                <div className="flex items-center gap-3">
+                  <svg className="w-5 h-5 text-red-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                    <path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z" strokeLinecap="round" strokeLinejoin="round" />
+                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  <a href={`https://instagram.com/${dojoInfo?.instagram || "sky_bound_martial_arts_academy"}`} target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-red-400 transition-colors">
+                    {dojoInfo?.instagram || "sky_bound_martial_arts_academy"}
                   </a>
                 </div>
               </div>
@@ -995,7 +1048,6 @@ export default function Home() {
 
           <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-[10px] text-gray-400">© {new Date().getFullYear()} {dojoInfo?.name || "Okinawa Shotokon"}. All Rights Reserved.</p>
-            <span className="text-[10px] text-red-500">Affiliated with GKSF & KIO</span>
           </div>
         </div>
       </footer>
