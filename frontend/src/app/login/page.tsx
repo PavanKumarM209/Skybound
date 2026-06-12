@@ -23,7 +23,7 @@ export default function Login() {
 
     try {
       // Try student login first
-      let response = await fetch("http://localhost:5000/api/student-login", {
+      let response = await fetch("/api/student-login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -40,7 +40,7 @@ export default function Login() {
       }
 
       // If not student, try instructor login
-      response = await fetch("http://localhost:5000/api/instructor-login-email", {
+      response = await fetch("/api/instructor-login-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -57,7 +57,7 @@ export default function Login() {
       }
 
       // If not instructor, try admin login
-      response = await fetch("http://localhost:5000/api/admin-login", {
+      response = await fetch("/api/admin-login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),

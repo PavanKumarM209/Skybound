@@ -19,7 +19,7 @@ export default function Announcements() {
   useEffect(() => {
     const fetchNews = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/news");
+        const response = await fetch("/api/news");
         const data = await response.json();
         setNews(data);
       } catch (error) {

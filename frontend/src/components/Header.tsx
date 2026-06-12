@@ -16,7 +16,7 @@ export default function Header() {
   useEffect(() => {
     const fetchDojoInfo = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/dojo-info");
+        const response = await fetch("/api/dojo-info");
         const data = await response.json();
         setDojoInfo(data[0] || null);
       } catch (error) {

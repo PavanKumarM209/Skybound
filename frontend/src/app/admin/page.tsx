@@ -133,7 +133,7 @@ export default function AdminDashboard() {
       }
 
       try {
-        const res = await fetch("http://localhost:5000/api/verify-token", {
+        const res = await fetch("/api/verify-token", {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -271,7 +271,7 @@ export default function AdminDashboard() {
       const payload: any = { username: acctUsername, profile_photo: acctPhoto };
       if (newPassword) payload.new_password = newPassword;
 
-      const res = await fetch("http://localhost:5000/api/update-account", {
+      const res = await fetch("/api/update-account", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
