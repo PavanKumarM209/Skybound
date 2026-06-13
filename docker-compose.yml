@@ -22,7 +22,9 @@ services:
     restart: always
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      shm_size: '256mb'
     container_name: skybound_frontend
     environment:
       - NODE_ENV=production
