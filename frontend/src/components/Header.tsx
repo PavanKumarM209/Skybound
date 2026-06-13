@@ -11,7 +11,7 @@ interface DojoInfo {
 
 export default function Header() {
   const [dojoInfo, setDojoInfo] = useState<DojoInfo | null>(null);
-  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     const fetchDojoInfo = async () => {
@@ -30,28 +30,28 @@ export default function Header() {
     <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-sm border-b border-border">
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         {/* Logo and Name */}
-        <div className="flex items-center gap-3">
-          <div className="relative">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          <div className="relative flex-shrink-0">
             <img
               src="/logo_karate.jpg"
               alt="Dojo Logo"
-              className="relative h-12 w-12 object-contain rounded-full border border-red-500/30 bg-card p-0.5 shadow-md shadow-red-950/10 dark:shadow-red-950/30"
+              className="relative h-9 w-9 md:h-12 md:w-12 object-contain rounded-full border border-red-500/30 bg-card p-0.5 shadow-md shadow-red-950/10 dark:shadow-red-950/30"
               onError={(e) => {
                 e.currentTarget.style.display = "none";
               }}
             />
           </div>
-          <div>
-            <span className="text-lg font-black tracking-wider bg-gradient-to-r from-foreground via-red-600 to-amber-500 bg-clip-text text-transparent uppercase">
-              {dojoInfo?.name || "Okinawa Shotokon"}
+          <div className="min-w-0">
+            <span className="block text-[11px] leading-tight sm:text-sm md:text-lg font-black tracking-wide bg-gradient-to-r from-foreground via-red-600 to-amber-500 bg-clip-text text-transparent uppercase">
+              {dojoInfo?.name || "Sky Bound Martial Arts Academy"}
             </span>
-            <span className="block text-[9px] text-red-600 font-mono tracking-widest uppercase">
+            <span className="hidden sm:block text-[9px] text-red-600 font-mono tracking-widest uppercase">
               Karate Do Sports Federation
             </span>
           </div>
         </div>
 
-        {/* Nav items */}
+        {/* Nav items (Desktop) */}
         <nav className="hidden md:flex items-center gap-8 text-sm font-semibold">
           <a href="/" className="text-red-600 hover:text-red-700 transition-colors">Home</a>
           <a href="/announcements" className="text-muted hover:text-red-600 transition-colors">Announcement</a>
@@ -60,12 +60,45 @@ export default function Header() {
           <a href="/#contact" className="text-muted hover:text-red-600 transition-colors">Contact</a>
         </nav>
 
-        <div className="flex items-center gap-4">
+        <div className="hidden md:flex items-center gap-4">
           <a href="/login" className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg transition-all text-sm">
             Login
           </a>
         </div>
+
+        {/* Hamburger Menu Button */}
+        <button
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          className="flex md:hidden p-2 text-foreground focus:outline-none hover:bg-slate-100 dark:hover:bg-slate-900 rounded-lg transition-colors"
+          aria-label="Toggle Menu"
+        >
+          {isMenuOpen ? (
+            <svg className="w-6 h-6 text-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          ) : (
+            <svg className="w-6 h-6 text-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          )}
+        </button>
       </div>
+
+      {/* Mobile Navigation Dropdown */}
+      {isMenuOpen && (
+        <div className="md:hidden border-t border-border bg-background/95 backdrop-blur-md px-6 py-4 space-y-4 animate-in slide-in-from-top-4 duration-200">
+          <nav className="flex flex-col gap-4 text-sm font-semibold">
+            <a href="/" onClick={() => setIsMenuOpen(false)} className="text-red-600 hover:text-red-700 py-1 transition-colors">Home</a>
+            <a href="/announcements" onClick={() => setIsMenuOpen(false)} className="text-muted hover:text-red-600 py-1 transition-colors">Announcement</a>
+            <a href="/belt-details" onClick={() => setIsMenuOpen(false)} className="text-muted hover:text-red-600 py-1 transition-colors">Belt Details</a>
+            <a href="/weapons" onClick={() => setIsMenuOpen(false)} className="text-muted hover:text-red-600 py-1 transition-colors">Weapons</a>
+            <a href="/#contact" onClick={() => setIsMenuOpen(false)} className="text-muted hover:text-red-600 py-1 transition-colors">Contact</a>
+            <a href="/login" onClick={() => setIsMenuOpen(false)} className="bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-6 rounded-lg text-center transition-all text-sm inline-block w-full">
+              Login
+            </a>
+          </nav>
+        </div>
+      )}
     </header>
   );
 }

@@ -83,8 +83,8 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex font-sans selection:bg-red-100">
-      {/* LEFT SIDE - Branding */}
+    <div className="min-h-screen bg-white flex flex-col md:flex-row font-sans selection:bg-red-100">
+      {/* LEFT SIDE - Branding (desktop only) */}
       <div className="hidden md:flex md:w-1/2 flex-col justify-center items-center px-12 py-20 bg-gradient-to-br from-red-50 via-white to-red-50">
         <div className="space-y-8 text-center">
           <div>
@@ -99,7 +99,7 @@ export default function Login() {
           </div>
 
           <div className="space-y-4">
-            <h1 className="text-4xl font-black text-slate-900">Skybound Academy</h1>
+            <h1 className="text-4xl font-black text-slate-900">Sky Bound Martial Arts Academy</h1>
             <p className="text-xl text-red-600 font-semibold">Martial Arts Excellence</p>
             <p className="text-slate-600 text-sm max-w-sm">
               Learn Real Martial Arts from Expert Instructors. Join our academy and master the art of Karate with our elite Senseis.
@@ -124,8 +124,46 @@ export default function Login() {
       </div>
 
       {/* RIGHT SIDE - Login Form */}
-      <div className="w-full md:w-1/2 flex flex-col justify-center items-center px-8 py-20 bg-white">
-        <div className="w-full max-w-sm space-y-8">
+      <div className="w-full md:w-1/2 flex flex-col justify-center items-center bg-white">
+
+        {/* Mobile-only top branding banner */}
+        <div className="md:hidden w-full bg-gradient-to-br from-red-600 to-red-800 px-8 pt-12 pb-10 flex flex-col items-center gap-4 text-center">
+          {/* Glowing logo */}
+          <div className="relative">
+            <div className="absolute -inset-1 rounded-full bg-white/30 blur-md animate-pulse" />
+            <img
+              src="/logo_karate.jpg"
+              alt="Skybound Logo"
+              className="relative w-20 h-20 rounded-full border-4 border-white/60 object-contain shadow-2xl"
+              onError={(e) => {
+                e.currentTarget.style.display = "none";
+              }}
+            />
+          </div>
+          <div>
+            <h1 className="text-xl font-black text-white tracking-wide uppercase leading-tight">
+              Sky Bound Martial Arts Academy
+            </h1>
+            <p className="text-red-200 text-xs font-semibold tracking-widest uppercase mt-1">
+              Karate Do Sports Federation
+            </p>
+          </div>
+          {/* Quick trust badges */}
+          <div className="flex items-center gap-4 mt-1">
+            <span className="flex items-center gap-1 text-white/90 text-[11px] font-semibold">
+              <span className="text-amber-300 font-black">✓</span> Expert Senseis
+            </span>
+            <span className="flex items-center gap-1 text-white/90 text-[11px] font-semibold">
+              <span className="text-amber-300 font-black">✓</span> Belt Grading
+            </span>
+            <span className="flex items-center gap-1 text-white/90 text-[11px] font-semibold">
+              <span className="text-amber-300 font-black">✓</span> WKF Affiliated
+            </span>
+          </div>
+        </div>
+
+        {/* Login form card */}
+        <div className="w-full max-w-sm space-y-8 px-8 py-10 md:py-20">
           <div className="space-y-2 text-center md:text-left">
             <h2 className="text-3xl font-black text-slate-900">Sign In</h2>
             <p className="text-slate-600 text-sm">Enter your credentials to access your account</p>

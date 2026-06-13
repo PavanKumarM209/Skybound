@@ -47,3 +47,49 @@ body {
 nextjs-portal {
   display: none !important;
 }
+
+/* ── Instructors Carousel ── */
+@keyframes scrollInstructors {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.instructors-track {
+  display: flex;
+  gap: 3rem;
+  width: max-content;
+  animation: scrollInstructors 28s linear infinite;
+}
+
+.instructors-track.paused {
+  animation-play-state: paused;
+}
+
+/* ── Recognitions / Logos Carousel ── */
+@keyframes scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.carousel-wrapper {
+  overflow: hidden;
+}
+
+.carousel-track {
+  display: flex;
+  width: max-content;
+  animation: scroll 18s linear infinite;
+}
+
+.carousel-track:hover {
+  animation-play-state: paused;
+}
+
+.carousel-logo {
+  min-width: 200px;
+  height: 110px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1rem;
+}

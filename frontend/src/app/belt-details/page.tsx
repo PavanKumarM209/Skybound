@@ -376,7 +376,7 @@ export default function BeltDetails() {
       {/* Interactive Syllabus Detail Modal */}
       {selectedBelt && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-lg w-full p-6 md:p-8 space-y-6 relative animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 md:p-8 space-y-6 relative animate-in fade-in zoom-in-95 duration-200">
             {/* Top Close Button */}
             <button
               onClick={() => setSelectedBelt(null)}
