@@ -17,6 +17,9 @@ TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID", "")
 TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN", "")
 TWILIO_PHONE_NUMBER = os.getenv("TWILIO_PHONE_NUMBER", "")
 
+SMTP_EMAIL = os.getenv("SMTP_EMAIL", "")
+SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
+
 JSON_DB_PATH = os.path.join(os.path.dirname(__file__), "db.json")
 
 DEFAULT_DB = {
@@ -106,24 +109,7 @@ DEFAULT_DB = {
             "image_url": "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?q=80&w=400&auto=format&fit=crop"
         }
     ],
-    "news": [
-        {
-            "_id": "news_1",
-            "title": "6th Royal Challenges Cup 2022",
-            "organizer": "TRADI",
-            "date": "2022-10-15",
-            "description": "Annual championship attracting teams from multiple states. Focus on Kumite and Kata categories.",
-            "image_url": "https://images.unsplash.com/photo-1517649763962-0c623066013b?q=80&w=600&auto=format&fit=crop"
-        },
-        {
-            "_id": "news_2",
-            "title": "KSKAI ALL INDIA KARATE CHAMPIONSHIP 2022",
-            "organizer": "KSKAI",
-            "date": "2022-12-05",
-            "description": "Elite tournament for brown and black belts to qualify for national selections.",
-            "image_url": "https://images.unsplash.com/photo-1555597673-b21d5c935865?q=80&w=600&auto=format&fit=crop"
-        }
-    ],
+    "news": [],
     "bookings": [
         {
             "_id": "book_1",

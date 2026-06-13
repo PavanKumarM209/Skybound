@@ -28,21 +28,21 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-sm border-b border-border">
-      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
         {/* Logo and Name */}
-        <div className="flex items-center gap-2 min-w-0 flex-1">
+        <div className="flex items-center gap-2 shrink-0 max-w-[200px] md:max-w-[260px]">
           <div className="relative flex-shrink-0">
             <img
               src="/logo_karate.jpg"
               alt="Dojo Logo"
-              className="relative h-9 w-9 md:h-12 md:w-12 object-contain rounded-full border border-red-500/30 bg-card p-0.5 shadow-md shadow-red-950/10 dark:shadow-red-950/30"
+              className="relative h-9 w-9 md:h-10 md:w-10 object-contain rounded-full border border-red-500/30 bg-card p-0.5 shadow-md shadow-red-950/10 dark:shadow-red-950/30"
               onError={(e) => {
                 e.currentTarget.style.display = "none";
               }}
             />
           </div>
           <div className="min-w-0">
-            <span className="block text-[11px] leading-tight sm:text-sm md:text-lg font-black tracking-wide bg-gradient-to-r from-foreground via-red-600 to-amber-500 bg-clip-text text-transparent uppercase">
+            <span className="block text-[11px] leading-tight sm:text-xs md:text-sm font-black tracking-wide bg-gradient-to-r from-foreground via-red-600 to-amber-500 bg-clip-text text-transparent uppercase truncate">
               {dojoInfo?.name || "Sky Bound Martial Arts Academy"}
             </span>
             <span className="hidden sm:block text-[9px] text-red-600 font-mono tracking-widest uppercase">
@@ -51,20 +51,15 @@ export default function Header() {
           </div>
         </div>
 
-        {/* Nav items (Desktop) */}
-        <nav className="hidden md:flex items-center gap-8 text-sm font-semibold">
-          <a href="/" className="text-red-600 hover:text-red-700 transition-colors">Home</a>
-          <a href="/announcements" className="text-muted hover:text-red-600 transition-colors">Announcement</a>
-          <a href="/belt-details" className="text-muted hover:text-red-600 transition-colors">Belt Details</a>
-          <a href="/weapons" className="text-muted hover:text-red-600 transition-colors">Weapons</a>
-          <a href="/#contact" className="text-muted hover:text-red-600 transition-colors">Contact</a>
+        {/* Nav items + Login (Desktop) */}
+        <nav className="hidden md:flex items-center gap-3 lg:gap-5 text-xs lg:text-sm font-semibold shrink-0">
+          <a href="/" className="text-red-600 hover:text-red-700 transition-colors whitespace-nowrap">Home</a>
+          <a href="/announcements" className="text-muted hover:text-red-600 transition-colors whitespace-nowrap">Announcement</a>
+          <a href="/belt-details" className="text-muted hover:text-red-600 transition-colors whitespace-nowrap">Belt Details</a>
+          <a href="/weapons" className="text-muted hover:text-red-600 transition-colors whitespace-nowrap">Weapons</a>
+          <a href="/#contact" className="text-muted hover:text-red-600 transition-colors whitespace-nowrap">Contact</a>
+          <a href="/login" className="bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-4 rounded-lg transition-all text-xs lg:text-sm whitespace-nowrap">Login</a>
         </nav>
-
-        <div className="hidden md:flex items-center gap-4">
-          <a href="/login" className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg transition-all text-sm">
-            Login
-          </a>
-        </div>
 
         {/* Hamburger Menu Button */}
         <button

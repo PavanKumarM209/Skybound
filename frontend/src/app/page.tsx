@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface Affiliation {
   name: string;
@@ -83,15 +83,81 @@ export default function Home() {
   // Selected Belt Info State
   const [activeBelt, setActiveBelt] = useState("white");
 
-  // Carousel Pause State
+  // Hero image slideshow
+  const heroImages = [
+    "/images/image copy 5.png",
+    "/images/image.png",
+    "/images/image copy.png",
+    "/images/image copy 2.png",
+    "/images/image copy 3.png",
+    "/images/image copy 4.png",
+    "/images/image copy 6.png",
+    "/images/image copy 7.png",
+    "/images/image copy 8.png",
+    "/images/image copy 9.png",
+  ];
+  const [heroIndex, setHeroIndex] = useState(0);
+  const [heroPrev, setHeroPrev] = useState<number | null>(null);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setHeroIndex((i) => {
+        setHeroPrev(i);
+        return (i + 1) % heroImages.length;
+      });
+    }, 2500);
+    return () => clearInterval(interval);
+  }, []);
+
+  const carouselScrollRef = useRef<HTMLDivElement>(null); // outer overflow-hidden div
+  const carouselInnerRef = useRef<HTMLDivElement>(null);  // inner flex div with cards
+  const [carouselIndex, setCarouselIndex] = useState(0);
   const [carouselPaused, setCarouselPaused] = useState(false);
+  const [CARDS_VISIBLE, setCardsVisible] = useState(4);
+  useEffect(() => {
+    const update = () => setCardsVisible(window.innerWidth < 640 ? 1 : window.innerWidth < 1024 ? 2 : 4);
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
+
+  const scrollToIndex = (idx: number) => {
+    const scroller = carouselScrollRef.current;
+    const inner = carouselInnerRef.current;
+    if (!scroller || !inner) return;
+    const card = inner.children[idx] as HTMLElement;
+    if (card) scroller.scrollTo({ left: card.offsetLeft, behavior: "smooth" });
+  };
+
+  const scrollInstructors = (dir: "left" | "right") => {
+    setCarouselPaused(true);
+    setCarouselIndex((prev) => {
+      const max = Math.max(0, instructors.length - CARDS_VISIBLE);
+      const next = dir === "right" ? Math.min(prev + 1, max) : Math.max(prev - 1, 0);
+      setTimeout(() => scrollToIndex(next), 0);
+      return next;
+    });
+    setTimeout(() => setCarouselPaused(false), 3000);
+  };
+
+  useEffect(() => {
+    if (instructors.length === 0) return;
+    if (carouselPaused) return;
+    const timer = setInterval(() => {
+      setCarouselIndex((prev) => {
+        const max = Math.max(0, instructors.length - CARDS_VISIBLE);
+        if (prev >= max) return prev;
+        const next = prev + 1;
+        setTimeout(() => scrollToIndex(next), 0);
+        return next;
+      });
+    }, 2500);
+    return () => clearInterval(timer);
+  }, [instructors.length, carouselPaused]);
 
   const handleInstructorClick = () => {
     setCarouselPaused(true);
-    const timer = setTimeout(() => {
-      setCarouselPaused(false);
-    }, 5000);
-    return () => clearTimeout(timer);
+    setTimeout(() => setCarouselPaused(false), 5000);
   };
 
   const beltData: Record<string, { title: string; kyu: string; desc: string; color: string; border: string }> = {
@@ -164,7 +230,7 @@ export default function Home() {
       try {
         setLoading(true);
         const [infoRes, instRes, newsRes, trusteeRes, supportingRes] = await Promise.all([
-          fetch("/api/dojo-info?_t=" + Date.now()).catch(() => null),
+          fetch("/api/dojo-info").catch(() => null),
           fetch("/api/instructors").catch(() => null),
           fetch("/api/news").catch(() => null),
           fetch("/api/trustees").catch(() => null),
@@ -371,21 +437,21 @@ export default function Home() {
 
       {/* Header / Navbar */}
       <header className="border-b border-border bg-header-bg backdrop-blur-md sticky top-0 z-50 transition-all duration-300">
-        <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2 min-w-0 flex-1">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2 shrink-0 max-w-[200px] md:max-w-[260px]">
             <div className="relative group flex-shrink-0">
               <div className="absolute -inset-0.5 rounded-full bg-gradient-to-r from-red-600 to-amber-500 opacity-70 blur-sm group-hover:opacity-100 transition duration-350 animate-pulse" />
               <img
                 src="/logo_karate.jpg"
                 alt="Dojo Logo"
-                className="relative h-9 w-9 md:h-12 md:w-12 object-contain rounded-full border border-red-500/30 bg-card p-0.5 shadow-md shadow-red-950/10 dark:shadow-red-950/30"
+                className="relative h-9 w-9 md:h-10 md:w-10 object-contain rounded-full border border-red-500/30 bg-card p-0.5 shadow-md shadow-red-950/10 dark:shadow-red-950/30"
                 onError={(e) => {
                   e.currentTarget.style.display = "none";
                 }}
               />
             </div>
             <div className="min-w-0">
-              <span className="block text-[11px] leading-tight sm:text-sm md:text-lg font-black tracking-wide bg-gradient-to-r from-foreground via-red-600 to-amber-500 bg-clip-text text-transparent uppercase">
+              <span className="block text-[11px] leading-tight sm:text-xs md:text-sm font-black tracking-wide bg-gradient-to-r from-foreground via-red-600 to-amber-500 bg-clip-text text-transparent uppercase truncate">
                 {dojoInfo?.name || "Sky Bound Martial Arts Academy"}
               </span>
               <span className="hidden sm:block text-[9px] text-red-600 font-mono tracking-widest uppercase">
@@ -394,21 +460,16 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Nav items (Desktop) */}
-          <nav className="hidden md:flex items-center gap-8 text-sm font-semibold">
-            <a href="/" className="text-red-600 hover:text-red-700 transition-colors">Home</a>
-            <a href="/announcements" className="text-muted hover:text-red-600 transition-colors">Announcement</a>
-            <a href="/belt-details" className="text-muted hover:text-red-600 transition-colors">Belt Details</a>
-            <a href="/weapons" className="text-muted hover:text-red-600 transition-colors">Weapons</a>
-            <a href="#instructors" className="text-muted hover:text-red-600 transition-colors">Instructors</a>
-            <a href="#contact" className="text-muted hover:text-red-600 transition-colors">Contact</a>
+          {/* Nav items + Login (Desktop) */}
+          <nav className="hidden md:flex items-center gap-3 lg:gap-5 text-xs lg:text-sm font-semibold shrink-0">
+            <a href="/" className="text-red-600 hover:text-red-700 transition-colors whitespace-nowrap">Home</a>
+            <a href="/announcements" className="text-muted hover:text-red-600 transition-colors whitespace-nowrap">Announcement</a>
+            <a href="/belt-details" className="text-muted hover:text-red-600 transition-colors whitespace-nowrap">Belt Details</a>
+            <a href="/weapons" className="text-muted hover:text-red-600 transition-colors whitespace-nowrap">Weapons</a>
+            <a href="#instructors" className="text-muted hover:text-red-600 transition-colors whitespace-nowrap">Instructors</a>
+            <a href="#contact" className="text-muted hover:text-red-600 transition-colors whitespace-nowrap">Contact</a>
+            <a href="/login" className="bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-4 rounded-lg transition-all text-xs lg:text-sm whitespace-nowrap">Login</a>
           </nav>
-
-          <div className="hidden md:flex items-center gap-4">
-            <a href="/login" className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg transition-all text-sm">
-              Login
-            </a>
-          </div>
 
           {/* Hamburger Menu Button */}
           <button
@@ -501,21 +562,40 @@ export default function Home() {
             
 
 
-            {/* Main Karate Practitioner Image */}
-            <div className="relative w-[90%] h-full rounded-2xl overflow-hidden border border-border bg-card shadow-2xl flex items-center justify-center">
+            {/* Hero Slideshow */}
+            <div className="relative w-[90%] h-full rounded-2xl overflow-hidden border border-border bg-card shadow-2xl">
+              {/* Previous image fading out */}
+              {heroPrev !== null && (
+                <img
+                  key={`prev-${heroPrev}`}
+                  src={heroImages[heroPrev]}
+                  alt="Karate Training"
+                  className="absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-700 opacity-0"
+                />
+              )}
+              {/* Current image fading in */}
               <img
-                src="/karate_practitioner.png"
-                alt="Karate Practitioner Kick"
-                className="object-cover w-full h-full object-center hover:scale-[1.03] transition-transform duration-700"
-                onError={(e) => {
-                  e.currentTarget.src = "https://images.unsplash.com/photo-1517649763962-0c623066013b?q=80&w=600&auto=format&fit=crop";
-                }}
+                key={`cur-${heroIndex}`}
+                src={heroImages[heroIndex]}
+                alt="Karate Training"
+                className="absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-700 opacity-100"
               />
               {/* Overlay gradient */}
               <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-80" />
-              
-              <div className="absolute bottom-6 left-6 right-6">
-                <p className="text-xs font-mono text-red-500 uppercase tracking-widest">Okinawa Shotokon</p>
+
+              {/* Dot indicators */}
+              <div className="absolute bottom-14 left-0 right-0 flex justify-center gap-1.5 z-10">
+                {heroImages.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => { setHeroPrev(heroIndex); setHeroIndex(i); }}
+                    className={`h-1.5 rounded-full transition-all duration-300 ${i === heroIndex ? "bg-red-500 w-4" : "bg-white/40 w-1.5"}`}
+                  />
+                ))}
+              </div>
+
+              <div className="absolute bottom-6 left-6 right-6 z-10">
+                <p className="text-xs font-mono text-red-500 uppercase tracking-widest">Sky Bound Martial Arts</p>
                 <h3 className="text-lg font-bold text-foreground">Traditional Kata & Kumite</h3>
               </div>
             </div>
@@ -524,163 +604,47 @@ export default function Home() {
 
         {/* AFFILIATIONS CAROUSEL SECTION */}
         <section className="w-full bg-gradient-to-r from-background via-card/50 to-background py-12">
-          <div className="max-w-7xl mx-auto px-6 mb-8">
-            <div className="text-center space-y-2">
-              <h2 className="text-xs font-mono text-red-500 uppercase tracking-widest">Recognized & Affiliated</h2>
-              <p className="text-2xl font-black text-foreground">Our Recognitions</p>
-            </div>
+          <div className="text-center space-y-2 mb-8 px-6">
+            <h2 className="text-xs font-mono text-red-500 uppercase tracking-widest">Recognized & Affiliated</h2>
+            <p className="text-2xl font-black text-foreground">Our Recognitions</p>
           </div>
 
-          {/* Animated Carousel */}
-          <div className="max-w-7xl mx-auto px-6">
-            {recognizationImages.length > 0 ? (
-              <>
-                <style>{`
-                  @keyframes scroll {
-                    0% {
-                      transform: translateX(0);
-                    }
-                    100% {
-                      transform: translateX(calc(-240px * ${recognizationImages.length}));
-                    }
-                  }
-                  .carousel-wrapper {
-                    overflow: hidden;
-                  }
-                  .carousel-track {
-                    display: flex;
-                    animation: scroll ${Math.max(12, recognizationImages.length * 3.5)}s linear infinite;
-                    gap: 0;
-                  }
-                  .carousel-track:hover {
-                    animation-play-state: paused;
-                  }
-                  .carousel-logo {
-                    min-width: 240px;
-                    height: 120px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                  }
-                `}</style>
-
-                <div className="carousel-wrapper">
-                  <div className="carousel-track">
-                    {/* Set 1 */}
-                    {recognizationImages.map((imgUrl, idx) => (
-                      <div key={`set1-${idx}`} className="carousel-logo px-4">
-                        <img
-                          src={imgUrl}
-                          alt={`Recognition ${idx}`}
-                          className="h-20 max-w-[200px] object-contain hover:scale-105 transition-transform duration-300 cursor-pointer"
-                          onClick={() => setSelectedGalleryImage(imgUrl)}
-                        />
-                      </div>
-                    ))}
-                    {/* Set 2 - Seamless repeat */}
-                    {recognizationImages.map((imgUrl, idx) => (
-                      <div key={`set2-${idx}`} className="carousel-logo px-4">
-                        <img
-                          src={imgUrl}
-                          alt={`Recognition Repeat ${idx}`}
-                          className="h-20 max-w-[200px] object-contain hover:scale-105 transition-transform duration-300 cursor-pointer"
-                          onClick={() => setSelectedGalleryImage(imgUrl)}
-                        />
-                      </div>
-                    ))}
-                  </div>
+          {/* Animated Carousel - full width */}
+          <div className="w-full overflow-hidden">
+            <style>{`
+              @keyframes recog-scroll {
+                0%   { transform: translateX(0); }
+                100% { transform: translateX(-50%); }
+              }
+              .recog-track {
+                display: flex;
+                width: max-content;
+                animation: recog-scroll ${Math.max(12, recognizationImages.length * 3)}s linear infinite;
+              }
+              .recog-track:hover {
+                animation-play-state: paused;
+              }
+              .recog-logo {
+                min-width: 200px;
+                height: 120px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0 2rem;
+              }
+            `}</style>
+            <div className="recog-track">
+              {[...recognizationImages, ...recognizationImages].map((imgUrl, idx) => (
+                <div key={idx} className="recog-logo">
+                  <img
+                    src={imgUrl}
+                    alt={`Recognition ${idx}`}
+                    className="h-20 max-w-[180px] object-contain hover:scale-105 transition-transform duration-300 cursor-pointer"
+                    onClick={() => setSelectedGalleryImage(imgUrl)}
+                  />
                 </div>
-              </>
-            ) : (
-              <>
-                <style>{`
-                  @keyframes scroll {
-                    0% {
-                      transform: translateX(0);
-                    }
-                    100% {
-                      transform: translateX(calc(-240px * 4));
-                    }
-                  }
-                  .carousel-wrapper {
-                    overflow: hidden;
-                  }
-                  .carousel-track {
-                    display: flex;
-                    animation: scroll 12s linear infinite;
-                    gap: 0;
-                  }
-                  .carousel-logo {
-                    min-width: 240px;
-                    height: 120px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                  }
-                `}</style>
-
-                <div className="carousel-wrapper">
-                  <div className="carousel-track">
-                    <div className="carousel-logo">
-                      <img
-                        src="/shotokon-karate-do-sports-federation.jpeg"
-                        alt="Shotokon"
-                        className="h-20 object-contain"
-                      />
-                    </div>
-                    <div className="carousel-logo">
-                      <img
-                        src="/karate-india-organisation-kio.png"
-                        alt="Karate India"
-                        className="h-20 object-contain"
-                      />
-                    </div>
-                    <div className="carousel-logo">
-                      <img
-                        src="/martial-arts-games-federation-mgfi.webp"
-                        alt="MGFI"
-                        className="h-20 object-contain"
-                      />
-                    </div>
-                    <div className="carousel-logo">
-                      <img
-                        src="/delhi-olympic-association.jpg"
-                        alt="Delhi Olympics"
-                        className="h-20 object-contain"
-                      />
-                    </div>
-                    <div className="carousel-logo">
-                      <img
-                        src="/shotokon-karate-do-sports-federation.jpeg"
-                        alt="Shotokon"
-                        className="h-20 object-contain"
-                      />
-                    </div>
-                    <div className="carousel-logo">
-                      <img
-                        src="/karate-india-organisation-kio.png"
-                        alt="Karate India"
-                        className="h-20 object-contain"
-                      />
-                    </div>
-                    <div className="carousel-logo">
-                      <img
-                        src="/martial-arts-games-federation-mgfi.webp"
-                        alt="MGFI"
-                        className="h-20 object-contain"
-                      />
-                    </div>
-                    <div className="carousel-logo">
-                      <img
-                        src="/delhi-olympic-association.jpg"
-                        alt="Delhi Olympics"
-                        className="h-20 object-contain"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </>
-            )}
+              ))}
+            </div>
           </div>
         </section>
 
@@ -755,8 +719,8 @@ export default function Home() {
 
         {/* INSTRUCTORS SECTION */}
         {instructors.length > 0 && (
-          <section id="instructors" className="max-w-7xl mx-auto px-6 py-20 border-t border-border">
-            <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
+          <section id="instructors" className="py-20 border-t border-border">
+            <div className="text-center max-w-2xl mx-auto mb-16 space-y-3 px-6">
               <h2 className="text-xs font-mono text-red-500 uppercase tracking-widest font-bold">Elite Instructors</h2>
               <p className="text-3xl sm:text-4xl font-black text-foreground">Our Expert Coaches</p>
               <p className="text-muted text-sm">
@@ -765,13 +729,27 @@ export default function Home() {
             </div>
 
             {/* Instructors Carousel - Auto-scrolling right to left */}
-            <div className="overflow-hidden">
-              <div className={`instructors-track ${carouselPaused ? 'paused' : ''}`}>
-                {[...instructors, ...instructors].map((inst, idx) => (
+            <div className="relative px-8">
+              {/* Left Arrow */}
+              <button
+                onClick={() => scrollInstructors("left")}
+                disabled={carouselIndex === 0}
+                className="hidden sm:flex absolute left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 items-center justify-center rounded-full bg-background border border-border shadow-lg hover:border-red-500 hover:text-red-500 transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-border disabled:hover:text-foreground"
+                aria-label="Scroll left"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+
+              <div className="overflow-x-auto w-full scrollbar-hide" ref={carouselScrollRef} style={{ scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch" }}>
+              <div className="flex gap-6 sm:gap-10" style={{ width: "max-content" }} ref={carouselInnerRef}>
+                {instructors.map((inst, idx) => (
                   <div
-                    key={`${inst._id}-${idx}`}
+                    key={inst._id}
                     onClick={handleInstructorClick}
-                    className="text-center space-y-3 flex flex-col items-center flex-shrink-0 w-72 cursor-pointer">
+                    style={{ scrollSnapAlign: "start" }}
+                    className="text-center space-y-3 flex flex-col items-center flex-shrink-0 w-56 sm:w-64 lg:w-72 cursor-pointer">
                     {/* Circular Image */}
                     <div className="relative group">
                       <div className="w-40 h-40 rounded-full overflow-hidden border-4 border-red-500/30 hover:border-red-500 transition-all duration-300 group-hover:shadow-lg group-hover:shadow-red-500/20 flex items-center justify-center bg-background">
@@ -821,6 +799,19 @@ export default function Home() {
                   </div>
                 ))}
               </div>
+              </div>
+
+              {/* Right Arrow */}
+              <button
+                onClick={() => scrollInstructors("right")}
+                disabled={carouselIndex >= instructors.length - CARDS_VISIBLE}
+                className="hidden sm:flex absolute right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 items-center justify-center rounded-full bg-background border border-border shadow-lg hover:border-red-500 hover:text-red-500 transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-border disabled:hover:text-foreground"
+                aria-label="Scroll right"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
             </div>
           </section>
         )}

@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from config import TWILIO_PHONE_NUMBER, logger
 from database import db, db_connected
 from utils import token_required, twilio_client
+from email_utils import booking_accepted_email, booking_rejected_email, trial_accepted_email, trial_rejected_email
 
 bookings_bp = Blueprint('bookings', __name__)
 
@@ -94,16 +95,18 @@ def update_booking_status(id):
 
             result = db["bookings"].update_one({"_id": query_id}, {"$set": {"status": status}})
 
+            student_name = booking.get("student_name", "Student")
+            student_email = booking.get("email", "")
+            program = booking.get("program", "Regular Training")
+            date = booking.get("date", "")
+
             # Send SMS if booking is accepted
             if status == "accepted" and twilio_client:
                 phone = booking.get("phone", "")
                 if phone:
-                    # Add +91 prefix if not present (for India)
                     if not phone.startswith("+"):
                         phone = "+91" + phone.lstrip("0")
-
                     try:
-                        student_name = booking.get("student_name", "Student")
                         twilio_client.messages.create(
                             body=f"Hi {student_name}! Your trial class booking has been accepted! Our Sensei will contact you soon. Thank you for choosing Skybound Academy!",
                             from_=TWILIO_PHONE_NUMBER,
@@ -112,6 +115,13 @@ def update_booking_status(id):
                         logger.info(f"SMS sent successfully to {phone}")
                     except Exception as sms_error:
                         logger.warning(f"Failed to send SMS: {sms_error}")
+
+            # Send email on accept or reject
+            if student_email:
+                if status == "accepted":
+                    booking_accepted_email(student_name, student_email, program, date)
+                elif status == "rejected":
+                    booking_rejected_email(student_name, student_email)
 
             if result.modified_count > 0 or result.matched_count > 0:
                 return jsonify({"success": True, "status": status}), 200
@@ -180,10 +190,28 @@ def update_trial_request(id):
 
     if db_connected and db is not None:
         try:
+            trial = db["trial_requests"].find_one({"_id": ObjectId(id)})
+            if not trial:
+                return jsonify({"error": "Request not found"}), 404
+
             result = db["trial_requests"].update_one(
                 {"_id": ObjectId(id)},
                 {"$set": {"status": status, "admin_notes": admin_notes}}
             )
+
+            # Send email on approve or reject
+            student_name = trial.get("student_name", "Student")
+            student_email = trial.get("email", "")
+            if student_email:
+                if status == "approved":
+                    trial_accepted_email(
+                        student_name, student_email,
+                        trial.get("program", "Regular Training"),
+                        trial.get("preferred_date", "")
+                    )
+                elif status == "rejected":
+                    trial_rejected_email(student_name, student_email)
+
             if result.modified_count > 0:
                 return jsonify({"success": True}), 200
             else:

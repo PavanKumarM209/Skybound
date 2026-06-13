@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 
 from config import logger
 from database import db, db_connected
+from email_utils import student_welcome_email
 
 students_bp = Blueprint('students', __name__)
 
@@ -37,6 +38,28 @@ def create_student():
 
             result = db["students"].insert_one(student_data)
             student_id = str(result.inserted_id)
+
+            # Send welcome email with login credentials
+            instructor_name = "Your Instructor"
+            try:
+                inst_id = req_data.get("instructor_id", "")
+                instructor = db["instructors"].find_one({"_id": inst_id})
+                if not instructor:
+                    instructor = db["instructors"].find_one({"_id": ObjectId(inst_id)})
+                if instructor:
+                    instructor_name = instructor.get("name", "Your Instructor")
+            except Exception:
+                pass
+
+            student_email = req_data.get("email", "")
+            if student_email:
+                student_welcome_email(
+                    student_name=req_data.get("name", "Student"),
+                    to_email=student_email,
+                    password=req_data.get("password", ""),
+                    instructor_name=instructor_name,
+                    login_url="https://skyboundmartialarts.online/login"
+                )
 
             return jsonify({
                 "success": True,

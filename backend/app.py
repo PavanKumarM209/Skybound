@@ -23,6 +23,15 @@ import uuid
 from flask import request
 from werkzeug.utils import secure_filename
 
+# Cache static-ish GET endpoints for 5 minutes in the browser
+CACHEABLE_ROUTES = {"/api/dojo-info", "/api/instructors", "/api/trustees", "/api/supporting-instructors", "/api/news"}
+
+@app.after_request
+def set_cache_headers(response):
+    if request.method == "GET" and request.path in CACHEABLE_ROUTES:
+        response.headers["Cache-Control"] = "public, max-age=300, stale-while-revalidate=60"
+    return response
+
 @app.route("/api/health", methods=["GET"])
 def health_check():
     status = "healthy"
