@@ -99,6 +99,7 @@ export default function InstructorDashboard() {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"bookings" | "students" | "attendance" | "payments" | "settings">("bookings");
   
   // Student view and list toggle states
@@ -590,15 +591,27 @@ export default function InstructorDashboard() {
 
   return (
     <div className="flex h-screen bg-slate-50 text-foreground font-sans overflow-hidden">
-      {/* Light Mode Collapsible Sidebar (Matching Admin) */}
+      {/* Mobile backdrop overlay when expanded */}
+      {isMobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-slate-900/50 z-30 md:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
       <aside
-        className={`${
-          isSidebarCollapsed ? "w-20" : "w-64"
-        } bg-white border-r border-slate-200 text-slate-800 flex flex-col transition-all duration-300 ease-in-out z-40`}
+        className={`
+          fixed md:relative inset-y-0 left-0 z-40 h-full shrink-0
+          bg-white border-r border-slate-200 text-slate-800 flex flex-col
+          transition-transform md:transition-all duration-300 ease-in-out
+          ${isMobileMenuOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full md:translate-x-0 md:shadow-none"}
+          ${isSidebarCollapsed ? "w-64 md:w-20" : "w-64"}
+        `}
       >
         {/* Brand / Logo */}
         <div className="h-16 flex items-center justify-between px-4 border-b border-slate-200 shrink-0 bg-white">
-          {!isSidebarCollapsed && (
+          {(!isSidebarCollapsed || isMobileMenuOpen) && (
             <div className="flex items-center gap-2 overflow-hidden truncate">
               <div className="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
                 I
@@ -606,19 +619,36 @@ export default function InstructorDashboard() {
               <span className="font-extrabold text-sm tracking-wider uppercase truncate text-slate-800">Skybound Coach</span>
             </div>
           )}
-          {isSidebarCollapsed && (
-            <div className="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center text-white font-bold text-sm mx-auto shrink-0">
+          {(isSidebarCollapsed && !isMobileMenuOpen) && (
+            <div 
+              className="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center text-white font-bold text-sm mx-auto shrink-0 cursor-pointer hover:bg-red-700 transition hidden md:flex"
+              onClick={() => setIsSidebarCollapsed(false)}
+              title="Expand Sidebar"
+            >
               I
             </div>
           )}
-          
+
+          {/* Close button for mobile */}
           <button
-            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-            className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-900 transition-colors ml-auto cursor-pointer"
-            title={isSidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="md:hidden p-1.5 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-900 transition-colors ml-auto cursor-pointer"
           >
-            {isSidebarCollapsed ? <ExpandIcon /> : <CollapseIcon />}
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
           </button>
+
+          {/* Collapse toggle for desktop */}
+          {(!isSidebarCollapsed && !isMobileMenuOpen) && (
+            <button
+              onClick={() => setIsSidebarCollapsed(true)}
+              className="hidden md:block p-1.5 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-900 transition-colors ml-auto cursor-pointer"
+              title="Collapse Sidebar"
+            >
+              <CollapseIcon />
+            </button>
+          )}
         </div>
 
         {/* Sidebar Nav Items */}
@@ -634,16 +664,21 @@ export default function InstructorDashboard() {
             return (
               <button
                 key={item.id}
-                onClick={() => setActiveTab(item.id as any)}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-all border-l-4 ${
+                onClick={() => {
+                  setActiveTab(item.id as any);
+                  if (window.innerWidth < 768) {
+                    setIsMobileMenuOpen(false);
+                  }
+                }}
+                className={`w-full flex items-center gap-3 py-3 rounded-lg text-sm font-semibold transition-all border-l-4 ${
                   isActive
                     ? "bg-red-50 text-red-600 border-red-600"
                     : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 border-transparent"
-                } ${isSidebarCollapsed ? "justify-center" : ""}`}
-                title={isSidebarCollapsed ? item.label : undefined}
+                } ${(isSidebarCollapsed && !isMobileMenuOpen) ? "justify-center px-0" : "px-3"}`}
+                title={(isSidebarCollapsed && !isMobileMenuOpen) ? item.label : undefined}
               >
                 <span className="shrink-0">{item.icon}</span>
-                {!isSidebarCollapsed && <span className="truncate">{item.label}</span>}
+                {(!isSidebarCollapsed || isMobileMenuOpen) && <span className="truncate">{item.label}</span>}
               </button>
             );
           })}
@@ -653,15 +688,15 @@ export default function InstructorDashboard() {
         <div className="p-3 border-t border-slate-200 shrink-0">
           <button
             onClick={handleLogout}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold text-red-600 hover:bg-red-50 hover:text-red-700 transition-all border-l-4 border-transparent ${
-              isSidebarCollapsed ? "justify-center" : ""
+            className={`w-full flex items-center gap-3 py-3 rounded-lg text-sm font-semibold text-red-600 hover:bg-red-50 hover:text-red-700 transition-all border-l-4 border-transparent ${
+              (isSidebarCollapsed && !isMobileMenuOpen) ? "justify-center px-0" : "px-3"
             }`}
-            title={isSidebarCollapsed ? "Logout" : undefined}
+            title={(isSidebarCollapsed && !isMobileMenuOpen) ? "Logout" : undefined}
           >
             <span className="shrink-0">
               <LogoutIcon />
             </span>
-            {!isSidebarCollapsed && <span className="truncate">Logout</span>}
+            {(!isSidebarCollapsed || isMobileMenuOpen) && <span className="truncate">Logout</span>}
           </button>
         </div>
       </aside>
@@ -669,8 +704,18 @@ export default function InstructorDashboard() {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col h-full overflow-hidden">
         {/* Custom Header (Matching Admin Header layout) */}
-        <header className="sticky top-0 z-30 bg-white border-b border-slate-200 h-16 shrink-0 flex items-center justify-between px-6 shadow-xs">
+        <header className="sticky top-0 z-30 bg-white border-b border-slate-200 h-16 shrink-0 flex items-center justify-between px-4 md:px-6 shadow-xs">
           <div className="flex items-center gap-3">
+            {/* Hamburger Button for Mobile */}
+            <button
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="md:hidden p-2 -ml-2 rounded-lg hover:bg-slate-100 text-slate-600 transition-colors"
+              aria-label="Open Menu"
+            >
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
             <img
               src="/logo_karate.jpg"
               alt="Dojo Logo"
@@ -680,8 +725,8 @@ export default function InstructorDashboard() {
               }}
             />
             <div>
-              <span className="text-base font-black tracking-wider bg-gradient-to-r from-foreground via-red-600 to-amber-500 bg-clip-text text-transparent uppercase">
-                Okinawa Shotokon
+              <span className="text-xs md:text-base font-black tracking-wider bg-gradient-to-r from-foreground via-red-600 to-amber-500 bg-clip-text text-transparent uppercase leading-tight">
+                Sky Bound
               </span>
               <span className="block text-[8px] text-red-600 font-mono tracking-widest uppercase">
                 Instructor Portal
@@ -689,13 +734,13 @@ export default function InstructorDashboard() {
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
-            <span className="text-xs text-muted font-semibold hidden md:inline-block bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-muted font-semibold hidden md:inline-block bg-slate-100 px-3 py-1 rounded-full border-slate-200 border">
               Instructor Mode
             </span>
             <button
               onClick={handleLogout}
-              className="border border-red-600/35 hover:border-red-600 text-red-600 hover:bg-red-50 font-bold py-1.5 px-4 rounded-lg transition-all text-xs cursor-pointer"
+              className="border border-red-600/35 hover:border-red-600 text-red-600 hover:bg-red-50 font-bold py-1.5 px-3 md:px-4 rounded-lg transition-all text-xs cursor-pointer"
             >
               Logout
             </button>

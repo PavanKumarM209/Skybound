@@ -53,6 +53,7 @@ export default function Home() {
   const [selectedCity, setSelectedCity] = useState("All");
   const [recognizationImages, setRecognizationImages] = useState<string[]>([]);
   const [selectedGalleryImage, setSelectedGalleryImage] = useState<string | null>(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
 
 
@@ -169,7 +170,7 @@ export default function Home() {
           setDojoInfo(infoData);
         } else {
           setDojoInfo({
-            name: "Okinawa Shotokon Karate Do",
+            name: "Sky Bound Martial Arts Academy",
             phone: "+91 90357 07028",
             email: "skyboundmartialartsacademy@gmail.com",
             address: "Chandu Dance Studio, near Mandara school, Doddabidarakallu, Bengaluru, Karnataka 560073",
@@ -369,29 +370,29 @@ export default function Home() {
       {/* Header / Navbar */}
       <header className="border-b border-border bg-header-bg backdrop-blur-md sticky top-0 z-50 transition-all duration-300">
         <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
             <div className="relative group flex-shrink-0">
               <div className="absolute -inset-0.5 rounded-full bg-gradient-to-r from-red-600 to-amber-500 opacity-70 blur-sm group-hover:opacity-100 transition duration-350 animate-pulse" />
               <img
                 src="/logo_karate.jpg"
                 alt="Dojo Logo"
-                className="relative h-12 w-12 object-contain rounded-full border border-red-500/30 bg-card p-0.5 shadow-md shadow-red-950/10 dark:shadow-red-950/30"
+                className="relative h-9 w-9 md:h-12 md:w-12 object-contain rounded-full border border-red-500/30 bg-card p-0.5 shadow-md shadow-red-950/10 dark:shadow-red-950/30"
                 onError={(e) => {
                   e.currentTarget.style.display = "none";
                 }}
               />
             </div>
-            <div>
-              <span className="text-lg font-black tracking-wider bg-gradient-to-r from-foreground via-red-600 to-amber-500 bg-clip-text text-transparent uppercase">
-                {dojoInfo?.name || "Okinawa Shotokon"}
+            <div className="min-w-0">
+              <span className="block text-[11px] leading-tight sm:text-sm md:text-lg font-black tracking-wide bg-gradient-to-r from-foreground via-red-600 to-amber-500 bg-clip-text text-transparent uppercase">
+                {dojoInfo?.name || "Sky Bound Martial Arts Academy"}
               </span>
-              <span className="block text-[9px] text-red-600 font-mono tracking-widest uppercase">
+              <span className="hidden sm:block text-[9px] text-red-600 font-mono tracking-widest uppercase">
                 Karate Do Sports Federation
               </span>
             </div>
           </div>
 
-          {/* Nav items */}
+          {/* Nav items (Desktop) */}
           <nav className="hidden md:flex items-center gap-8 text-sm font-semibold">
             <a href="/" className="text-red-600 hover:text-red-700 transition-colors">Home</a>
             <a href="/announcements" className="text-muted hover:text-red-600 transition-colors">Announcement</a>
@@ -401,12 +402,46 @@ export default function Home() {
             <a href="#contact" className="text-muted hover:text-red-600 transition-colors">Contact</a>
           </nav>
 
-          <div className="flex items-center gap-4">
+          <div className="hidden md:flex items-center gap-4">
             <a href="/login" className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg transition-all text-sm">
               Login
             </a>
           </div>
+
+          {/* Hamburger Menu Button */}
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="flex md:hidden p-2 text-foreground focus:outline-none hover:bg-slate-100 dark:hover:bg-slate-900 rounded-lg transition-colors"
+            aria-label="Toggle Menu"
+          >
+            {isMenuOpen ? (
+              <svg className="w-6 h-6 text-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg className="w-6 h-6 text-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            )}
+          </button>
         </div>
+
+        {/* Mobile Navigation Dropdown */}
+        {isMenuOpen && (
+          <div className="md:hidden border-t border-border bg-header-bg/95 backdrop-blur-md px-6 py-4 space-y-4 animate-in slide-in-from-top-4 duration-200">
+            <nav className="flex flex-col gap-4 text-sm font-semibold">
+              <a href="/" onClick={() => setIsMenuOpen(false)} className="text-red-600 hover:text-red-700 py-1 transition-colors">Home</a>
+              <a href="/announcements" onClick={() => setIsMenuOpen(false)} className="text-muted hover:text-red-600 py-1 transition-colors">Announcement</a>
+              <a href="/belt-details" onClick={() => setIsMenuOpen(false)} className="text-muted hover:text-red-600 py-1 transition-colors">Belt Details</a>
+              <a href="/weapons" onClick={() => setIsMenuOpen(false)} className="text-muted hover:text-red-600 py-1 transition-colors">Weapons</a>
+              <a href="#instructors" onClick={() => setIsMenuOpen(false)} className="text-muted hover:text-red-600 py-1 transition-colors">Instructors</a>
+              <a href="#contact" onClick={() => setIsMenuOpen(false)} className="text-muted hover:text-red-600 py-1 transition-colors">Contact</a>
+              <a href="/login" onClick={() => setIsMenuOpen(false)} className="bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-6 rounded-lg text-center transition-all text-sm inline-block w-full">
+                Login
+              </a>
+            </nav>
+          </div>
+        )}
       </header>
 
       {/* Main Container */}
@@ -414,12 +449,12 @@ export default function Home() {
         
         {/* HERO SECTION */}
         <section id="home" className="max-w-7xl mx-auto px-6 pt-12 pb-20 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          <div className="lg:col-span-7 space-y-6 text-center lg:text-left flex flex-col items-center lg:items-start">
+          <div className="lg:col-span-7 order-2 lg:order-1 space-y-6 text-center lg:text-left flex flex-col items-center lg:items-start">
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-foreground leading-tight">
               Learn Real Martial Arts, <br />
               <span className="bg-gradient-to-r from-red-500 via-red-400 to-amber-500 bg-clip-text text-transparent">
-                {dojoInfo?.name || "Okinawa Shotokon Karate Do"}
+                {dojoInfo?.name || "Sky Bound Martial Arts Academy"}
               </span>
             </h1>
             <p className="text-muted text-base sm:text-lg max-w-2xl mx-auto lg:mx-0 leading-relaxed">
@@ -441,24 +476,24 @@ export default function Home() {
             </div>
 
             {/* Quick Stats */}
-            <div className="grid grid-cols-3 gap-6 pt-8 border-t border-border max-w-md mx-auto lg:mx-0">
+            <div className="grid grid-cols-3 gap-3 sm:gap-6 pt-8 border-t border-border max-w-md mx-auto lg:mx-0">
               <div>
-                <p className="text-2xl sm:text-3xl font-black text-foreground">100%</p>
-                <p className="text-[10px] sm:text-xs text-muted uppercase tracking-wider font-mono">Self Defense Focused</p>
+                <p className="text-lg sm:text-2xl md:text-3xl font-black text-foreground">100%</p>
+                <p className="text-[9px] sm:text-xs text-muted uppercase tracking-wider font-mono">Self Defense Focused</p>
               </div>
               <div>
-                <p className="text-2xl sm:text-3xl font-black text-red-500">Every 6 months</p>
-                <p className="text-[10px] sm:text-xs text-muted uppercase tracking-wider font-mono">Belt Grading Exams</p>
+                <p className="text-lg sm:text-2xl md:text-3xl font-black text-red-500">Every 6 months</p>
+                <p className="text-[9px] sm:text-xs text-muted uppercase tracking-wider font-mono">Belt Grading Exams</p>
               </div>
               <div>
-                <p className="text-2xl sm:text-3xl font-black text-amber-500">WKF</p>
-                <p className="text-[10px] sm:text-xs text-muted uppercase tracking-wider font-mono">Official Affiliation</p>
+                <p className="text-lg sm:text-2xl md:text-3xl font-black text-amber-500">WKF</p>
+                <p className="text-[9px] sm:text-xs text-muted uppercase tracking-wider font-mono">Official Affiliation</p>
               </div>
             </div>
           </div>
 
           {/* Hero Images Area */}
-          <div className="lg:col-span-5 relative flex items-center justify-center h-[350px] sm:h-[450px]">
+          <div className="lg:col-span-5 order-1 lg:order-2 relative flex items-center justify-center h-[350px] sm:h-[450px]">
             {/* Soft background shape decoration */}
             <div className="absolute w-[80%] h-[80%] rounded-full bg-gradient-to-tr from-red-600/5 to-amber-500/5 dark:from-red-600/10 dark:to-amber-500/10 blur-3xl -z-10" />
             
@@ -654,7 +689,7 @@ export default function Home() {
             <div className="flex justify-center lg:justify-start">
               <div className="relative">
                 <div className="absolute -inset-1 bg-gradient-to-r from-red-600 to-amber-500 rounded-full opacity-75 blur-xl" />
-                <div className="relative w-80 h-80 rounded-full overflow-hidden border-4 border-red-500/30 bg-card shadow-2xl flex items-center justify-center">
+                <div className="relative w-64 h-64 sm:w-80 sm:h-80 rounded-full overflow-hidden border-4 border-red-500/30 bg-card shadow-2xl flex items-center justify-center">
                   <img
                     src="/umapathi_ss.png"
                     alt="Founder"
@@ -678,7 +713,7 @@ export default function Home() {
                   <div className="space-y-0.5 pt-4 border-t border-border">
                     <p className="text-xl sm:text-2xl font-black text-foreground">Master Umapathi S S</p>
                     <p className="text-xs text-red-500 uppercase tracking-wider font-semibold">Founder, President & Chief Coach</p>
-                    <p className="text-[10px] text-muted block">Sky Bound Martial Arts Academy</p>
+                <p className="text-[10px] text-muted block">Sky Bound Martial Arts Academy</p>
                     <div className="pt-2 flex flex-col space-y-1 text-xs">
                       <a href="tel:+919035707028" className="text-red-500 hover:text-red-600 font-semibold transition-colors flex items-center gap-1.5 w-fit">
                         <svg className="w-3.5 h-3.5 text-red-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
@@ -727,26 +762,7 @@ export default function Home() {
               </p>
             </div>
 
-            <style>{`
-              @keyframes scrollInstructors {
-                0% {
-                  transform: translateX(0);
-                }
-                100% {
-                  transform: translateX(calc(-280px * ${instructors.length}));
-                }
-              }
-              .instructors-track {
-                display: flex;
-                animation: scrollInstructors 30s linear infinite;
-                gap: 3rem;
-              }
-              .instructors-track.paused {
-                animation-play-state: paused;
-              }
-            `}</style>
-
-            {/* Instructors Carousel - Auto-scrolling Left to Right */}
+            {/* Instructors Carousel - Auto-scrolling right to left */}
             <div className="overflow-hidden">
               <div className={`instructors-track ${carouselPaused ? 'paused' : ''}`}>
                 {[...instructors, ...instructors].map((inst, idx) => (
@@ -814,7 +830,7 @@ export default function Home() {
       {/* POPUP MODAL FOR HEADER TRIAL BUTTON */}
       {showBookingModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 animate-in fade-in duration-300">
-          <div className="w-full max-w-lg bg-card border border-border rounded-3xl p-6 sm:p-8 shadow-2xl relative">
+          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-card border border-border rounded-3xl p-6 sm:p-8 shadow-2xl relative">
             <button
               onClick={() => {
                 setShowBookingModal(false);
@@ -959,7 +975,7 @@ export default function Home() {
       {/* Footer */}
       <footer id="contact" className="mt-auto bg-slate-950 py-16 text-xs font-sans">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-12 mb-12">
             {/* Contact Section */}
             <div className="space-y-4">
               <h4 className="text-sm font-bold text-white uppercase tracking-wider">Contact Us</h4>
@@ -1047,7 +1063,7 @@ export default function Home() {
           </div>
 
           <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-[10px] text-gray-400">© {new Date().getFullYear()} {dojoInfo?.name || "Okinawa Shotokon"}. All Rights Reserved.</p>
+            <p className="text-[10px] text-gray-400">© {new Date().getFullYear()} {dojoInfo?.name || "Sky Bound Martial Arts Academy"}. All Rights Reserved.</p>
           </div>
         </div>
       </footer>
