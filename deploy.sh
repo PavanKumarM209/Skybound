@@ -29,8 +29,8 @@ echo "[1/4] Pulling latest code..."
 git pull origin test
 
 echo "[2/4] Building Docker images (one at a time to save memory)..."
-docker compose build --no-cache backend
-docker compose build --no-cache frontend
+docker compose build backend
+docker compose build frontend
 
 echo "[3/4] Starting services..."
 docker compose down --remove-orphans
