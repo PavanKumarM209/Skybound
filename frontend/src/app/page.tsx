@@ -51,7 +51,14 @@ export default function Home() {
   const [news, setNews] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCity, setSelectedCity] = useState("All");
-  const [recognizationImages, setRecognizationImages] = useState<string[]>([]);
+  const [recognizationImages] = useState<string[]>([
+    "/recognization/logo1_kska.png",
+    "/recognization/logo2_wako_india.png",
+    "/recognization/logo3_khelo_india.png",
+    "/recognization/logo4_skif.png",
+    "/recognization/logo5_sai.png",
+    "/recognization/logo6_karate_india.png",
+  ]);
   const [selectedGalleryImage, setSelectedGalleryImage] = useState<string | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -156,13 +163,12 @@ export default function Home() {
     async function loadData() {
       try {
         setLoading(true);
-        const [infoRes, instRes, newsRes, trusteeRes, supportingRes, recognizationRes] = await Promise.all([
+        const [infoRes, instRes, newsRes, trusteeRes, supportingRes] = await Promise.all([
           fetch("/api/dojo-info?_t=" + Date.now()).catch(() => null),
           fetch("/api/instructors").catch(() => null),
           fetch("/api/news").catch(() => null),
           fetch("/api/trustees").catch(() => null),
           fetch("/api/supporting-instructors").catch(() => null),
-          fetch("/api/recognization-images").catch(() => null)
         ]);
 
         if (infoRes && infoRes.ok) {
@@ -279,10 +285,6 @@ export default function Home() {
           setNews(newsData);
         }
 
-        if (recognizationRes && recognizationRes.ok) {
-          const recognizationData = await recognizationRes.json();
-          setRecognizationImages(recognizationData);
-        }
       } catch (error) {
         console.error("Failed to fetch dojo data", error);
       } finally {
