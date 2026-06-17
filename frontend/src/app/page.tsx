@@ -438,7 +438,7 @@ export default function Home() {
       {/* Header / Navbar */}
       <header className="border-b border-border bg-header-bg backdrop-blur-md sticky top-0 z-50 transition-all duration-300">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2 shrink-0 max-w-[200px] md:max-w-[260px]">
+          <div className="flex items-center gap-2 shrink-0 max-w-[70%] md:max-w-[260px]">
             <div className="relative group flex-shrink-0">
               <div className="absolute -inset-0.5 rounded-full bg-gradient-to-r from-red-600 to-amber-500 opacity-70 blur-sm group-hover:opacity-100 transition duration-350 animate-pulse" />
               <img
@@ -514,7 +514,7 @@ export default function Home() {
         <section id="home" className="max-w-7xl mx-auto px-6 pt-12 pb-20 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           <div className="lg:col-span-7 order-2 lg:order-1 space-y-6 text-center lg:text-left flex flex-col items-center lg:items-start">
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-foreground leading-tight">
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-foreground leading-tight">
               Learn Real Martial Arts, <br />
               <span className="bg-gradient-to-r from-red-500 via-red-400 to-amber-500 bg-clip-text text-transparent">
                 {dojoInfo?.name || "Sky Bound Martial Arts Academy"}
@@ -539,16 +539,16 @@ export default function Home() {
             </div>
 
             {/* Quick Stats */}
-            <div className="grid grid-cols-3 gap-3 sm:gap-6 pt-8 border-t border-border max-w-md mx-auto lg:mx-0">
-              <div>
+            <div className="flex flex-wrap justify-between gap-4 pt-8 border-t border-border max-w-md mx-auto lg:mx-0">
+              <div className="flex-1 min-w-[90px]">
                 <p className="text-lg sm:text-2xl md:text-3xl font-black text-foreground">100%</p>
                 <p className="text-[9px] sm:text-xs text-muted uppercase tracking-wider font-mono">Self Defense Focused</p>
               </div>
-              <div>
+              <div className="flex-1 min-w-[110px]">
                 <p className="text-lg sm:text-2xl md:text-3xl font-black text-red-500">Every 6 months</p>
                 <p className="text-[9px] sm:text-xs text-muted uppercase tracking-wider font-mono">Belt Grading Exams</p>
               </div>
-              <div>
+              <div className="flex-1 min-w-[90px]">
                 <p className="text-lg sm:text-2xl md:text-3xl font-black text-amber-500">WKF</p>
                 <p className="text-[9px] sm:text-xs text-muted uppercase tracking-wider font-mono">Official Affiliation</p>
               </div>
@@ -857,7 +857,7 @@ export default function Home() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-[10px] font-mono text-muted uppercase mb-1">{"Student's Age"}</label>
                     <input
@@ -907,7 +907,7 @@ export default function Home() {
                   </select>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-[10px] font-mono text-muted uppercase mb-1">Program</label>
                     <select
@@ -1088,7 +1088,7 @@ export default function Home() {
 
       {/* GALLERY LIGHTBOX MODAL */}
       {selectedGalleryImage && (
-        <div className="fixed inset-0 z-55 flex items-center justify-center bg-slate-950/90 backdrop-blur-xs p-4" onClick={() => setSelectedGalleryImage(null)}>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/90 backdrop-blur-xs p-4" onClick={() => setSelectedGalleryImage(null)}>
           <div className="relative max-w-4xl w-full flex flex-col items-center" onClick={(e) => e.stopPropagation()}>
             <button
               onClick={() => setSelectedGalleryImage(null)}
