@@ -1055,11 +1055,11 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="pt-8 flex flex-col items-center justify-center gap-1.5 text-center">
+          <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-[10px] text-gray-400">
               © {new Date().getFullYear()} {dojoInfo?.name || "Sky Bound Martial Arts Academy"}. All Rights Reserved.
             </p>
-            <p className="text-[10px] text-red-500/80 font-medium">
+            <p className="text-[10px] text-gray-400">
               Developed by @Pavan Kumar M
             </p>
           </div>
