@@ -103,6 +103,71 @@ function TextAreaField({ label, ...props }: { label: string } & React.TextareaHT
   );
 }
 
+const renderFormattedDescription = (text: string) => {
+  if (!text) return null;
+  const lines = text.split('\n');
+  return (
+    <div className="space-y-1.5 font-sans">
+      {lines.map((line, index) => {
+        const cleanLine = line.replace(/^\u200b/, '').trim();
+        if (!cleanLine) return <div key={index} className="h-2" />;
+
+        // Check if it's a bullet point
+        if (cleanLine.startsWith('-') || cleanLine.startsWith('•')) {
+          const content = cleanLine.substring(1).trim();
+          return (
+            <div key={index} className="flex items-start gap-2 pl-2 text-slate-600 dark:text-slate-400">
+              <span className="text-red-500 font-bold mt-0.5">•</span>
+              <span className="text-xs">{content}</span>
+            </div>
+          );
+        }
+
+        // Check if there is a colon
+        const colonIndex = cleanLine.indexOf(':');
+        if (colonIndex > 0) {
+          const label = cleanLine.substring(0, colonIndex).trim();
+          const value = cleanLine.substring(colonIndex + 1).trim();
+
+          let labelClass = "font-bold text-slate-800 dark:text-slate-200 text-[10px] md:text-xs";
+          let valueClass = "text-slate-600 dark:text-slate-400 text-[10px] md:text-xs";
+
+          const lowerLabel = label.toLowerCase();
+          
+          if (lowerLabel.includes('phone') || lowerLabel.includes('email') || lowerLabel.includes('contact')) {
+            valueClass = "font-bold text-red-600 dark:text-red-400 text-[10px] md:text-xs";
+          } else if (lowerLabel.includes('guest') || lowerLabel.includes('organizer') || lowerLabel.includes('organised')) {
+            valueClass = "font-bold text-slate-800 dark:text-slate-100 text-[10px] md:text-xs";
+          } else if (lowerLabel.includes('dates') || lowerLabel.includes('venue')) {
+            valueClass = "font-semibold text-slate-700 dark:text-slate-300 text-[10px] md:text-xs";
+          }
+
+          return (
+            <div key={index} className="leading-relaxed">
+              <span className={labelClass}>{label}: </span>
+              <span className={valueClass}>{value}</span>
+            </div>
+          );
+        }
+
+        // Header or plain line (e.g. title)
+        const isTitleLine = index === 0;
+        return (
+          <div 
+            key={index} 
+            className={isTitleLine 
+              ? "font-extrabold text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-1 mb-2 text-[10px] md:text-xs" 
+              : "font-semibold text-slate-700 dark:text-slate-300 text-[10px] md:text-xs mt-1"
+            }
+          >
+            {cleanLine}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
 export default function AdminDashboard() {
   const [adminId, setAdminId] = useState<string | null>(null);
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -1031,7 +1096,7 @@ export default function AdminDashboard() {
                             <img
                               src={item.image_url || "https://images.unsplash.com/photo-1517649763962-0c623066013b?q=80&w=600&auto=format&fit=crop"}
                               alt={item.title}
-                              className="w-full h-40 object-cover border-b border-slate-200"
+                              className="w-full h-auto object-contain border-b border-slate-200"
                               onError={(e) => {
                                 e.currentTarget.src = "https://images.unsplash.com/photo-1517649763962-0c623066013b?q=80&w=600&auto=format&fit=crop";
                               }}
@@ -1041,7 +1106,7 @@ export default function AdminDashboard() {
                               <p className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">
                                 {item.date} • {item.organizer}
                               </p>
-                              <p className="text-xs text-slate-500 line-clamp-3">{item.description}</p>
+                              <div className="text-xs line-clamp-3">{renderFormattedDescription(item.description)}</div>
                             </div>
                           </div>
                           <div className="p-5 pt-0 border-t border-slate-100 flex justify-end">

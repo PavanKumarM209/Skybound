@@ -71,6 +71,71 @@ const ExpandIcon = () => (
   </svg>
 );
 
+const renderFormattedDescription = (text: string) => {
+  if (!text) return null;
+  const lines = text.split('\n');
+  return (
+    <div className="space-y-1.5 font-sans">
+      {lines.map((line, index) => {
+        const cleanLine = line.replace(/^\u200b/, '').trim();
+        if (!cleanLine) return <div key={index} className="h-2" />;
+
+        // Check if it's a bullet point
+        if (cleanLine.startsWith('-') || cleanLine.startsWith('•')) {
+          const content = cleanLine.substring(1).trim();
+          return (
+            <div key={index} className="flex items-start gap-2 pl-2 text-slate-600 dark:text-slate-400">
+              <span className="text-red-500 font-bold mt-0.5">•</span>
+              <span className="text-xs">{content}</span>
+            </div>
+          );
+        }
+
+        // Check if there is a colon
+        const colonIndex = cleanLine.indexOf(':');
+        if (colonIndex > 0) {
+          const label = cleanLine.substring(0, colonIndex).trim();
+          const value = cleanLine.substring(colonIndex + 1).trim();
+
+          let labelClass = "font-bold text-slate-800 dark:text-slate-200 text-xs";
+          let valueClass = "text-slate-600 dark:text-slate-400 text-xs";
+
+          const lowerLabel = label.toLowerCase();
+          
+          if (lowerLabel.includes('phone') || lowerLabel.includes('email') || lowerLabel.includes('contact')) {
+            valueClass = "font-bold text-red-600 dark:text-red-400 text-xs";
+          } else if (lowerLabel.includes('guest') || lowerLabel.includes('organizer') || lowerLabel.includes('organised')) {
+            valueClass = "font-bold text-slate-800 dark:text-slate-100 text-xs";
+          } else if (lowerLabel.includes('dates') || lowerLabel.includes('venue')) {
+            valueClass = "font-semibold text-slate-700 dark:text-slate-300 text-xs";
+          }
+
+          return (
+            <div key={index} className="leading-relaxed">
+              <span className={labelClass}>{label}: </span>
+              <span className={valueClass}>{value}</span>
+            </div>
+          );
+        }
+
+        // Header or plain line (e.g. title)
+        const isTitleLine = index === 0;
+        return (
+          <div 
+            key={index} 
+            className={isTitleLine 
+              ? "font-extrabold text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-1 mb-2 text-xs md:text-sm" 
+              : "font-semibold text-slate-700 dark:text-slate-300 text-xs mt-1"
+            }
+          >
+            {cleanLine}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
 export default function StudentDashboard() {
   const [studentId, setStudentId] = useState<string | null>(null);
   const [studentData, setStudentData] = useState<StudentData | null>(null);
@@ -463,11 +528,11 @@ export default function StudentDashboard() {
                         {news.length > 0 ? (
                           <div className="space-y-3">
                             {news[0].image_url && (
-                              <div className="relative h-32 bg-slate-100 rounded-lg overflow-hidden mb-3 border border-slate-200">
+                              <div className="relative h-auto bg-slate-100 rounded-lg overflow-hidden mb-3 border border-slate-200">
                                 <img
                                   src={news[0].image_url}
                                   alt={news[0].title}
-                                  className="w-full h-full object-cover"
+                                  className="w-full h-auto object-contain"
                                   onError={(e) => {
                                     e.currentTarget.style.display = 'none';
                                   }}
@@ -475,7 +540,7 @@ export default function StudentDashboard() {
                               </div>
                             )}
                             <h3 className="font-extrabold text-slate-800 text-sm group-hover:text-red-600 transition-colors">{news[0].title}</h3>
-                            <p className="text-xs text-slate-500 line-clamp-3 leading-relaxed">{news[0].description}</p>
+                             <div className="text-xs text-slate-500 line-clamp-3 leading-relaxed">{renderFormattedDescription(news[0].description)}</div>
                           </div>
                         ) : (
                           <p className="text-slate-400 text-xs py-4">No announcements posted recently.</p>
@@ -507,11 +572,11 @@ export default function StudentDashboard() {
                       {news.map((item) => (
                         <div key={item._id} className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs hover:shadow-md transition-all duration-300 flex flex-col justify-between group">
                           {item.image_url && (
-                            <div className="relative h-48 bg-slate-100 overflow-hidden border-b border-slate-200">
+                            <div className="relative h-auto bg-slate-100/50 overflow-hidden border-b border-slate-200">
                               <img
                                 src={item.image_url}
                                 alt={item.title}
-                                className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500"
+                                className="w-full h-auto object-contain transition-transform duration-500"
                                 onError={(e) => {
                                   e.currentTarget.style.display = 'none';
                                 }}
@@ -524,8 +589,8 @@ export default function StudentDashboard() {
                                 <span>By {item.organizer}</span>
                                 <span>{item.date}</span>
                               </div>
-                              <h3 className="text-base font-black text-slate-800 group-hover:text-red-605 transition-colors">{item.title}</h3>
-                              <p className="text-xs text-slate-500 leading-relaxed font-semibold">{item.description}</p>
+                               <h3 className="text-base font-black text-slate-800 group-hover:text-red-605 transition-colors">{item.title}</h3>
+                               <div className="text-xs">{renderFormattedDescription(item.description)}</div>
                             </div>
                           </div>
                         </div>
