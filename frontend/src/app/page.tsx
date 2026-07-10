@@ -1056,7 +1056,9 @@ export default function Home() {
           </div>
 
           <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-[10px] text-gray-400">© {new Date().getFullYear()} {dojoInfo?.name || "Sky Bound Martial Arts Academy"}. All Rights Reserved.</p>
+            <p className="text-[10px] text-gray-400">
+              © {new Date().getFullYear()} {dojoInfo?.name || "Sky Bound Martial Arts Academy"}. All Rights Reserved. Developed by @Pavan Kumar M
+            </p>
           </div>
         </div>
       </footer>
