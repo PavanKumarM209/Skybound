@@ -1055,7 +1055,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="pt-8 flex flex-col items-start gap-1.5 text-left">
             <p className="text-[10px] text-gray-400">
               © {new Date().getFullYear()} {dojoInfo?.name || "Sky Bound Martial Arts Academy"}. All Rights Reserved.
             </p>
